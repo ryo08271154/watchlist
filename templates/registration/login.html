@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            padding: 1rem;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            text-align: center;
+        }
+        form {
+            background: white;
+            padding: clamp(1rem, 5vw, 2rem);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        input {
+            width: 100%;
+            padding: clamp(0.5rem, 2vw, 0.8rem);
+            margin: 0.5rem 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: clamp(0.5rem, 2vw, 0.8rem);
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 480px) {
+            form {
+                padding: 1rem;
+                margin: 0 1rem;
+            }
+
+            h1 {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+{% if user.is_authenticated %}
+    <h1>アカウント切り替え</h1>
+    <p>{%if user.nickname%}{{user.nickname}}{%else%}ユーザー{%endif%}としてログインしています。</p>
+    <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" id="logout">アカウント切り替え</button>
+    </form>
+    <form action="{% url 'records:index' %}">
+    <button type="submit">キャンセル</button>
+    </form>
+{% else %}
+    <h1>ログイン</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">ログイン</button>
+    </form>
+{% endif %}
+</body>
+</html>

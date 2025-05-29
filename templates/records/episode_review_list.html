@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{%block title%}{{episode.title.title}}｜レビュー{%endblock%}
+{% block head %}
+    <style>
+        .title-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+        }
+    </style>
+{%endblock%}
+{%block content%}
+    <ul>
+        <li><a href="{% url 'records:episode_review_create' episode.pk%}">レビュー追加</a></li>
+    </ul>
+    <div class="title-section">
+        <h2>レビュー</h2>
+        <p>{{watch_records.count}}件</p>
+        <div class="title-container">
+        {%if watch_records%}
+            {% for item in watch_records%}
+            <a href="{% url 'records:episode_review_detail' item.id %}" class="title-item">
+                <h3>{{item.comment_title}}</h3>
+                <p>{{item.title}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>現在表示できるデータがありません。データが追加されるとここに表示されます。</h3>
+            <ul><li><a href="{% url 'records:episode_review_create' episode.pk %}">レビュー追加</a></li></ul>
+        {%endif%}
+        </div>
+    </div>
+{%endblock%}

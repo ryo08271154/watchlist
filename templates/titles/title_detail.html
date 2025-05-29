@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{%block title%}{{title.title}}{%endblock%}
+{%block head%}
+<style>
+    .title-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 16px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        scroll-behavior: smooth;
+    }
+</style>
+{%endblock%}
+{%block content%}
+    <ul>
+        <li><a href="{% url 'titles:title_edit' title.id %}">編集</a></li>
+    </ul>
+    <h1>{{title.title}}</h1>
+    <h2><a href="{% url 'records:search' %}?q={{title.air_date|date:'Y-m-'}}">{{title.air_date|date:"Y年m月"}}</a>｜シーズン{{title.season}}</h2>
+    <p>{{title.content}}</p>
+    {%if title.source_website%}<p>データ取得元：{{title.source_website}}</p>{%endif%}
+    <ul>
+        <li><a href="{% url 'records:title_review_list' title.id %}">レビュー</a></li>
+    </ul>
+    <div class="title-section">
+        <h2><a href="{% url 'titles:title_episodes' title.id %}">エピソード</a></h2>
+        <p>{{episodes.count}}件</p>
+        <div class="title-container">
+        {%if episodes%}
+            {% for item in episodes%}
+            <a href="{% url 'titles:episode_detail' item.id %}" class="title-item">
+            <div class="episode-item">
+                <h3>{{item.episode_title}}</h3>
+            </div>
+                <h3>エピソード{{item.episode_number}}</h3>
+                <p>{{item.air_date}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>現在表示できるデータがありません。データが追加されるとここに表示されます。</h3>
+            <ul><li><a href="{% url 'titles:title_episode_create' title.id %}">エピソード追加</a></li><li><a href="{% url 'titles:title_episode_import_external' title.id%}">エピソードを外部サイトから追加</a></li></ul>
+        {%endif%}
+        </div>
+    </div>
+
+
+    {% if title.related_titles.all%}
+    <div class="title-section">
+        <h2>関連タイトル</h2>
+        <p></p>
+        <div class="title-container">
+            {% for item in title.related_titles.all%}
+            <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
+                <h3>{{item.title}}</h3>
+                <p>{{item.content}}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {%endif%}
+    {% if title.tags.all%}
+    <h3>タグ</h3>
+    <ul>
+        {%for i in title.tags.all%}
+        <li><a href="{% url 'records:tag_detail' i.id%}">{{i.name}}</a></li>
+        {%endfor%}
+    </ul>
+    {% endif %}
+
+{%endblock%}

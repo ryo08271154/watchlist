@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{%block title%}{{watch_record.episode.title}}｜レビュー詳細{%endblock%}
+{%block content%}
+    {% if watch_record.user == user %}<ul>
+        <li><a href="{% url 'records:episode_review_edit' watch_record.pk%}">レビュー編集</a></li>
+    </ul>{% endif %}
+    <h1>{{watch_record.comment_title}}</h1>
+    <h2>{{watch_record.get_status_display}}｜評価:{{watch_record.rating}}</h2>
+    <p>{{watch_record.comment}}</p>
+    <h3><a href="{% url 'titles:episode_detail' watch_record.episode.pk%}">{{watch_record.episode.title}}｜シーズン{{watch_record.episode.title.season}}</a></h3>
+    <h3>タグ</h3>
+    <ul>
+        {%for i in watch_record.tags.all%}
+        <li><a href="{% url 'records:tag_detail' i.id%}">{{i.name}}</a></li>
+        {%endfor%}
+    </ul>
+{%endblock%}

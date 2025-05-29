@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{%block title%}{{ form.instance.title}}{{form.instance.episode.title}}{%endblock%}
+{%block head%}
+    <style>
+        input[type="text"] {
+            padding: 0.4em 0.8em;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #fff;
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        button {
+            padding: 0.4em 1em;
+            border: none;
+            border-radius: 8px;
+            background: #1976d2;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover, button:focus {
+            background: #1565c0;
+        }
+    </style>
+{%endblock%}
+{%block content%}
+    <div class="top-bar">
+        <form method="GET" autocomplete="off">
+            {{ source_select_form.as_p }}
+            <button type="submit">検索</button>
+        </form>
+    </div>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">追加</button>
+    </form>
+{%endblock%}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{%block title%}{{episode.title}}｜エピソード{{episode.episode_number}}{%endblock%}
+{%block content%}
+    <ul><li><a href="{% url 'titles:episode_edit' episode.id %}">編集</a></li></ul>
+    <h1>エピソード{{episode.episode_number}} {{episode.episode_title}}</h1>
+    <h2>{{episode.duration}}分｜{{episode.air_date}}</h2>
+    <h3><a href="{% url 'titles:title_detail' episode.title.id %}">{{episode.title}}</a></h3>
+    <p>{{episode.content}}</p>
+    {%if episode.source_website%}<p>データ取得元：{{episode.source_website}}</p>{%endif%}
+    <ul><li><a href="{% url 'records:episode_review_list' episode.id %}">レビュー</a></li></ul>
+    <h3>タグ</h3>
+    {%for i in episode.tags.all%}
+    <ul>
+    <li><a href="{%url 'records:tag_detail' i.id%}">{{i.name}}</a></li>
+    </ul>
+    {%endfor%}
+{%endblock%}

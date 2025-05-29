@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{%block title%}マイリスト{%endblock%}
+{% block head %}
+    <style>
+        .title-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+        }
+    </style>
+{%endblock%}
+{%block content%}
+    <ul><li><a href="{% url 'records:mylist_create'%}">マイリストを作成</a></li></ul>
+    <div class="title-section">
+        <h2>マイリスト</h2>
+        <p>{{my_lists.count}}件</p>
+        <div class="title-container">
+        {%if my_lists%}
+            {% for item in my_lists%}
+            <a href="{% url 'records:mylist_detail' item.id %}" class="title-item">
+                <h3>{{item.name}}</h3>
+                <p>{{item.description}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>まだ何も登録されていません</h3>
+        {%endif%}
+        </div>
+    </div>
+{%endblock%}

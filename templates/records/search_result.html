@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{%block title%}検索結果{%endblock%}
+{% block head %}
+    <style>
+        .title-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+        }
+    </style>
+{%endblock%}
+{%block content%}
+    {% if "title" in search_type%}
+    <div class="title-section">
+        <h2><a href="?q={{request.GET.q}}&type=title">タイトル</a></h2>
+        <p>{{titles.count}}件</p>
+        <div class="title-container">
+        {%if titles%}
+            {% for item in titles%}
+            <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
+                <h3>{{item.title}}</h3>
+                <p>{{item.content}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>見つかりませんでした</h3>
+        {%endif%}
+        </div>
+    </div>
+    {% endif %}
+    {% if "episode" in search_type%}
+    <div class="title-section">
+        <h2><a href="?q={{request.GET.q}}&type=episode">エピソード</a></h2>
+        <p>{{episodes.count}}件</p>
+        <div class="title-container">
+        {%if episodes%}
+            {% for item in episodes%}
+            <a href="{% url 'titles:episode_detail' item.id %}" class="title-item">
+                <div class="episode-item">
+                    <h3>{{item.episode_title}}</h3>
+                </div>
+                <h3>エピソード{{item.episode_number}}</h3>
+                <p>{{item.title}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>見つかりませんでした</h3>
+        {%endif%}
+        </div>
+    </div>
+    {% endif %}
+    {% if "record" in search_type%}
+    <div class="title-section">
+        <h2><a href="?q={{request.GET.q}}&type=record">レビュー</a></h2>
+        <p>{{watch_records.count}}件</p>
+        <div class="title-container">
+        {%if watch_records%}
+            {% for item in watch_records%}
+            <a href="{% url 'records:review_detail' item.id %}" class="title-item">
+                <h3>{{item.comment_title}}</h3>
+                <p>{{item.title}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>見つかりませんでした</h3>
+        {%endif%}
+        </div>
+    </div>
+    {% endif %}
+    {% if "episode_record" in search_type%}
+    <div class="title-section">
+        <h2><a href="?q={{request.GET.q}}&type=episode_record">エピソードレビュー</a></h2>
+        <p>{{episode_watch_records.count}}件</p>
+        <div class="title-container">
+        {%if episode_watch_records%}
+            {% for item in episode_watch_records%}
+            <a href="{% url 'records:episode_review_detail' item.id %}" class="title-item">
+                <h3>{{item.comment_title}}</h3>
+                <p>{{item.episode.title}}｜エピソード{{item.episode.episode_number}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>見つかりませんでした</h3>
+        {%endif%}
+        </div>
+    </div>
+    {% endif %}
+    {% if "mylist" in search_type%}
+    <div class="title-section">
+        <h2><a href="?q={{request.GET.q}}&type=mylist">マイリスト</a></h2>
+        <p>{{my_list.count}}件</p>
+        <div class="title-container">
+        {%if my_list%}
+            {% for item in my_list%}
+            <a href="{% url 'records:mylist_detail' item.id %}" class="title-item">
+                <h3>{{item.name}}</h3>
+                <p>{{item.description}}</p>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>見つかりませんでした</h3>
+        {%endif%}
+        </div>
+    </div>
+    {% endif %}
+{%endblock%}
