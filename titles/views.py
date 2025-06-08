@@ -83,7 +83,7 @@ def csv_file_read(request_file):
     file=io.StringIO(request_file.read().decode("shift-jis"))
     return csv.reader(file)
 #全タイトル表示
-class TitleListView(ListView):
+class TitleListView(LoginRequiredMixin,ListView):
     model=Title
     content_object_name="titles"
     template_name="titles/title_list.html"
@@ -92,7 +92,7 @@ class TitleListView(ListView):
         context["titles"]=Title.objects.all()
         return context
 #タイトル詳細表示
-class TitleDetailView(DetailView):
+class TitleDetailView(LoginRequiredMixin,DetailView):
     model=Title
     content_object_name="title"
     template_name="titles/title_detail.html"
