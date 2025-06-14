@@ -308,6 +308,8 @@ class TagView(LoginRequiredMixin,ListView):
     model=Tag
     context_object_name="tags"
     template_name="records/tag_list.html"
+    def get_queryset(self):
+        return super().get_queryset().order_by("name")
 #タグ詳細表示
 class TagDetailView(LoginRequiredMixin,DetailView):
     model=Tag

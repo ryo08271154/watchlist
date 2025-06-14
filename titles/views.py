@@ -83,7 +83,7 @@ def csv_file_read(request_file):
     file=io.StringIO(request_file.read().decode("shift-jis"))
     return csv.reader(file)
 #全タイトル表示
-class TitleListView(ListView):
+class TitleListView(LoginRequiredMixin,ListView):
     model=Title
     content_object_name="titles"
     template_name="titles/title_list.html"
@@ -92,7 +92,7 @@ class TitleListView(ListView):
         context["titles"]=Title.objects.all()
         return context
 #タイトル詳細表示
-class TitleDetailView(DetailView):
+class TitleDetailView(LoginRequiredMixin,DetailView):
     model=Title
     content_object_name="title"
     template_name="titles/title_detail.html"
@@ -415,6 +415,22 @@ class TitleEpisodeSourceImportView(LoginRequiredMixin,FormView):
         context["source_select_form"]=SourceSelectForm(initial={"q":get_object_or_404(Title,id=self.kwargs["pk"]).title})
         return context
 
+class MyWatchScheduleView(LoginRequiredMixin,View):
+    model=Episode
+    template_name="titles/watch_schedule.html"
+    def get(self,request):
+        queryset=[]
+        days=[]
+        for day in range(8):
+            start_time=datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0)+datetime.timedelta(days=day)
+            end_time=start_time+datetime.timedelta(days=1)
+            queryset.append(Episode.objects.filter(air_date__range=[timezone.make_aware(start_time),timezone.make_aware(end_time)]).order_by("air_date"))
+            days.append(start_time)
+        data=zip(queryset,days)
+        today=datetime.datetime.now()
+        last_week=datetime.datetime.now()-datetime.timedelta(days=7)
+        next_week=datetime.datetime.now()+datetime.timedelta(days=7)
+        return render(request,"titles/watch_schedule.html",{"data":data,"today":today,"last_week":last_week,"next_week":next_week})
 class TitleExportView(BaseExportView):
     model=Title
 class EpisodeExportView(BaseExportView):
