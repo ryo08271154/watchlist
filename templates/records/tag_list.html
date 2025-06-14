@@ -14,15 +14,53 @@
 {%endblock%}
 {%block content%}
     <div class="title-section">
-        <h2>タグ</h2>
-        <p>{{tags.count}}件</p>
+        <h2>年別タグ</h2>
+        <p></p>
         <div class="title-container">
         {%if tags%}
             {% for item in tags%}
+             {%if "年" in item.name and "春" not in item.name and "夏" not in item.name and "秋" not in item.name and "冬" not in item.name %}
             <a href="{% url 'records:tag_detail' item.id %}" class="title-item">
                 <h3>{{item.name}}</h3>
                 <p>{{item.description}}</p>
             </a>
+            {%endif%}
+            {% endfor %}
+        {%else%}
+            <h3>見つかりませんでした</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>時期別タグ</h2>
+        <p></p>
+        <div class="title-container">
+        {%if tags%}
+            {% for item in tags%}
+            {%if "春" in item.name or "夏" in item.name or "秋" in item.name or "冬" in item.name%}
+            <a href="{% url 'records:tag_detail' item.id %}" class="title-item">
+                <h3>{{item.name}}</h3>
+                <p>{{item.description}}</p>
+            </a>
+            {%endif%}
+            {% endfor %}
+        {%else%}
+            <h3>見つかりませんでした</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>その他のタグ</h2>
+        <p></p>
+        <div class="title-container">
+        {%if tags%}
+            {% for item in tags%}
+            {%if "月" not in item.name and "年" not in item.name%}
+            <a href="{% url 'records:tag_detail' item.id %}" class="title-item">
+                <h3>{{item.name}}</h3>
+                <p>{{item.description}}</p>
+            </a>
+            {%endif%}
             {% endfor %}
         {%else%}
             <h3>見つかりませんでした</h3>
