@@ -26,7 +26,6 @@ urlpatterns=[
 
              path("mypage",views.MypageView.as_view(),name="mypage"),
              path("mypage/stats",views.MyStats.as_view(),name="mystats"),
-             path("mypage/watch_schedule",views.MyWatchScheduleView.as_view(),name="my_watch_schedule"),
 
              path("reviews/export",views.ReviewExportView.as_view(),name="review_export"),
              path("episode_reviews/export",views.EpisodeReviewExportView.as_view(),name="episode_review_export"),

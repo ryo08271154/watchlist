@@ -308,6 +308,8 @@ class TagView(LoginRequiredMixin,ListView):
     model=Tag
     context_object_name="tags"
     template_name="records/tag_list.html"
+    def get_queryset(self):
+        return super().get_queryset().order_by("name")
 #タグ詳細表示
 class TagDetailView(LoginRequiredMixin,DetailView):
     model=Tag
@@ -447,24 +449,6 @@ class MyStats(LoginRequiredMixin,View):
         watched_graph=watched_month(request,month)
         watched_season_graph=watched_season(request)
         return render(request,"records/mystats.html",{"total_watched":total_watched,"watched_count":watched_count,"total_watched_series":total_watched_series,"watched_series_count":watched_series_count,"episode_count":episode_count,"total_episode":total_episode,"total_duration":total_duration,"watched_graph":watched_graph,"watched_duration_graph":watched_duration_graph,"watched_season_graph":watched_season_graph})
-class MyWatchScheduleView(LoginRequiredMixin,View):
-    model=Episode
-    template_name="records/my_watch_schedule.html"
-    def get(self,request):
-        queryset=[]
-        days=[]
-        for day in range(8):
-            start_time=datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0)+datetime.timedelta(days=day)
-            end_time=start_time+datetime.timedelta(days=1)
-            print(start_time,end_time)
-            queryset.append(Episode.objects.filter(air_date__range=[timezone.make_aware(start_time),timezone.make_aware(end_time)]).order_by("air_date"))
-            days.append(start_time)
-        data=zip(queryset,days)
-        print(data)
-        today=datetime.datetime.now()
-        last_week=datetime.datetime.now()-datetime.timedelta(days=7)
-        next_week=datetime.datetime.now()+datetime.timedelta(days=7)
-        return render(request,"records/my_watch_schedule.html",{"data":data,"today":today,"last_week":last_week,"next_week":next_week})
 class ReviewExportView(BaseExportView):
     model=WatchRecord
     order_by="watched_date"

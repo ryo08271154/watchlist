@@ -14,7 +14,7 @@ urlpatterns=[path("titles/",views.TitleListView.as_view(),name="title_list"),
              path("title/<uuid:pk>/episode/import/external",views.TitleEpisodeSourceImportView.as_view(),name="title_episode_import_external"),
              path("episode/<uuid:pk>",views.EpisodeDetailView.as_view(),name="episode_detail"),
              path("episode/<uuid:pk>/edit",views.EpisodeEditView.as_view(),name="episode_edit"),
-
+             path("watch_schedule",views.MyWatchScheduleView.as_view(),name="watch_schedule"),
 
             path("titles/export",views.TitleExportView.as_view(),name="title_export"),
             path("episodes/export",views.EpisodeExportView.as_view(),name="episode_export")
