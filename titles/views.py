@@ -357,7 +357,7 @@ def syoboi_calender_episode_get(title,selected_titles_id,title_episodes):
                 episode_number=int(item.find("Count").text)
                 pid=item.find("PID").text
                 episode_search=title_episodes.filter(episode_number=episode_number) #同じのが登録されてないか探す
-                if episode_search.count()>=1 and episode_search.first().episode_title==None and item.find("STSubTitle").text:
+                if episode_search.count()>=1 and episode_search.first().episode_title=="" and item.find("STSubTitle").text:
                     #同じのが登録されていてエピソードタイトルが登録されていない場合登録する
                     episode=episode_search.first()
                     episode.episode_title=item.find("STSubTitle").text
