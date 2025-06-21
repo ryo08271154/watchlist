@@ -14,7 +14,9 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.11]
-
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DATABASE_URL: sqlite:///db.sqlite3
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
