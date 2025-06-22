@@ -324,48 +324,101 @@ class TagDetailView(LoginRequiredMixin,DetailView):
         context["my_lists"]=MyList.objects.filter(Q(tags=self.get_object())&(Q(user=self.request.user)|Q(is_public=True)))
         return context
 #検索
+def search_index_view(request):
+    genres=Genre.objects.all()
+    sub_genres=SubGenre.objects.all()
+    air_date=Title.objects.values_list("air_date",flat=True).distinct().order_by("air_date")
+    tag=Tag.objects.all().order_by("?")[:10].values_list("name",flat=True)
+    watched_date=WatchRecord.objects.filter(user=request.user).values_list("watched_date",flat=True).distinct().order_by("watched_date")
+    status=WatchRecord.objects.all().distinct().order_by("status")
+    watch_method=WatchMethod.objects.values_list("name",flat=True).distinct().order_by("name")
+    keywords=[]
+    keywords.append(Genre.objects.all().order_by("?")[0].name)
+    keywords.append(SubGenre.objects.all().order_by("?")[0].name)
+    keywords.extend(tag)
+    context={"genres":genres,"sub_genres":sub_genres,"air_date":air_date,"keywords":keywords,"watched_date":watched_date,"status":status,"watch_method":watch_method}
+    return render(request,"records/search_index.html",context)
 class SearchView(LoginRequiredMixin,View):
     context_object_name="titles"
     template_name="records/search.html"
     def get(self,request):
-        titles=None
-        episodes=None
-        watch_records=None
-        episode_watch_records=None
-        my_list=None
+        titles=Title.objects.all()
+        episodes=Episode.objects.all()
+        watch_records=WatchRecord.objects.filter(Q(user=request.user)|Q(user__is_public=True))
+        episode_watch_records=EpisodeWatchRecord.objects.filter(Q(user=request.user)|Q(user__is_public=True))
+        my_list=MyList.objects.filter(Q(user=request.user)|Q(is_public=True))
         keywords=self.request.GET.get('q')
         search_type=self.request.GET.get("type")
+        genre=self.request.GET.get("genre")
+        sub_genre=self.request.GET.get("sub_genre")
+        season=self.request.GET.get("season")
+        air_date=self.request.GET.get("air_date")
+        tag=self.request.GET.get("tag")
+        episode_number=self.request.GET.get("episode_number")
+        duration=self.request.GET.get("duration")
+        watched_date=self.request.GET.get("watched_date")
+        rating=self.request.GET.get("rating")
+        status=self.request.GET.get("status")
+        watch_method=self.request.GET.get("watch_method")
+        title_conditions={("genre__name",genre),("sub_genre__name",sub_genre),("season",season),("air_date__icontains",air_date),("tags__name",tag)}
+        episode_conditions={("title__genre__name",genre),("title__sub_genre__name",sub_genre),("title__season",season),("episode_number",episode_number),("duration",duration),("air_date__icontains",air_date),("tags__name",tag)}
+        watch_record_conditions={("title__genre__name",genre),("title__sub_genre__name",sub_genre),("title__season",season),("title__air_date__icontains",air_date),("watched_date__icontains",watched_date),("rating",rating),("status",status),("watch_method__name",watch_method),("tags__name",tag)}
+        episode_watch_record_conditions={("episode__title__genre__name",genre),("episode__title__sub_genre__name",sub_genre),("episode__title__season",season),("episode__title__air_date__icontains",air_date),("watched_date__icontains",watched_date),("rating",rating),("status",status),("watch_method__name",watch_method),("tags__name",tag)}
+        mylist_conditions={("tags__name",tag)}
+        conditions=[genre,sub_genre,season,air_date,tag,episode_number,duration,watched_date,rating,status,watch_method]
+        if not keywords and not search_type and not any(conditions): #キーワードが入力されてないとき検索トップ表示
+            if keywords=="" or search_type=="" or any(i=="" for i in conditions):
+                return redirect("records:search")
+            return search_index_view(request)
         if search_type:
-            search_type=search_type.split()
-        else:
+            search_type=search_type.split(",")
+        else: #検索範囲が指定されてない場合検索タイプを設定
             search_type=["title","record","episode_record","episode","mylist"]
-        if not keywords and search_type:
+        if genre or sub_genre or season or air_date:
+            search_type.remove("mylist")
+        if episode_number or duration:
+            search_type.remove("title")
+            search_type.remove("mylist")
+        if rating or status or watch_method or watched_date:
+            search_type.remove("title")
+            search_type.remove("episode")
+            search_type.remove("mylist")
+        def apply_filters(queryset,conditions):
+            for field, value in conditions:
+                if value:
+                    queryset=queryset.filter(**{field: value})
+            return queryset
+        titles=apply_filters(titles, title_conditions)
+        episodes=apply_filters(episodes, episode_conditions)
+        watch_records=apply_filters(watch_records, watch_record_conditions)
+        episode_watch_records=apply_filters(episode_watch_records, episode_watch_record_conditions)
+        my_list=apply_filters(my_list, mylist_conditions)
+        if keywords:
+            keywords=keywords.split()
+            for keyword in keywords:
+                if "title" in search_type:
+                    titles=titles.filter(Q(title__icontains=keyword)|Q(title_kana__icontains=keyword)|Q(short_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(genre__name__icontains=keyword)|Q(sub_genre__name__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
+                if "record" in search_type:
+                    watch_records=watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
+                if "episode_record" in search_type:
+                    episode_watch_records=episode_watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
+                if "episode" in search_type:
+                    episodes=episodes.filter(Q(title__title__icontains=keyword)|Q(episode_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(duration__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
+                if "mylist" in search_type:
+                    my_list=my_list.filter((Q(name__icontains=keyword)|Q(description__icontains=keyword))&(Q(user=request.user)|Q(is_public=True))).distinct()
+        if search_type:
+            context={"search_type":search_type}
             if "title" in search_type:
-                titles=Title.objects.all()
+                context.update({"titles":titles})
             if "episode" in search_type:
-                episodes=Episode.objects.all()
+                context.update({"episodes":episodes})
             if "record" in search_type:
-                watch_records=WatchRecord.objects.filter(user=request.user)
+                context.update({"watch_records":watch_records})
             if "episode_record" in search_type:
-                episode_watch_records=EpisodeWatchRecord.objects.filter(user=request.user)
+                context.update({"episode_watch_records":episode_watch_records})
             if "mylist" in search_type:
-                my_list=MyList.objects.filter(Q(user=request.user)|Q(is_public=True))
-            return render(request,"records/search_result.html",{"search_type":search_type,"titles":titles,"episodes":episodes,"watch_records":watch_records,"episode_watch_records":episode_watch_records,"my_list":my_list})
-        elif not keywords:
-            return render(request,"records/search_index.html")
-        keywords=keywords.split()
-        for keyword in keywords:
-            if "title" in search_type:
-                titles=Title.objects.filter(Q(title__icontains=keyword)|Q(title_kana__icontains=keyword)|Q(short_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(genre__name__icontains=keyword)|Q(sub_genre__name__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
-            if "record" in search_type:
-                watch_records=WatchRecord.objects.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
-            if "episode_record" in search_type:
-                episode_watch_records=EpisodeWatchRecord.objects.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
-            if "episode" in search_type:
-                episodes=Episode.objects.filter(Q(title__title__icontains=keyword)|Q(episode_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(duration__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
-            if "mylist" in search_type:
-                my_list=MyList.objects.filter((Q(name__icontains=keyword)|Q(description__icontains=keyword))&(Q(user=request.user)|Q(is_public=True))).distinct()
-        return render(request,"records/search_result.html",{"search_type":search_type,"titles":titles,"episodes":episodes,"watch_records":watch_records,"episode_watch_records":episode_watch_records,"my_list":my_list})
+                context.update({"my_list":my_list})
+        return render(request,"records/search_result.html",context)
 
 class MypageView(LoginRequiredMixin,View):
     def get(self,request):
@@ -433,7 +486,7 @@ def watched_duration(request,month): #月間視聴時間グラフとすべての
         month_watched_duration.append(month_total_duration) #エピソードすべての合計時間
         label_month.append(m.strftime("%m"))
     return total_duration,create_graph(label_month,month_watched_duration,"月","視聴時間","月間視聴時間",locator=ticker.AutoLocator())
-class MyStats(LoginRequiredMixin,View):
+class MyStatsView(LoginRequiredMixin,View):
     def get(self,request):
         month=[]
         today=datetime.date.today().replace(day=1)
