@@ -1,2 +1,139 @@
 {% extends 'base.html' %}
 {%block title%}検索する{%endblock%}
+{% block head %}
+    <style>
+        .title-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+        }
+    </style>
+{%endblock%}
+{% block content %}
+    <div class="search-form">
+        <form action="{%url 'records:search'%}" autocomplete="off" method="get">
+            <label for="genre">ジャンル</label>
+            <select id="genre" name="genre">
+                <option value="">すべて</option>
+                {% for item in genres %}
+                    <option value="{{item}}">{{item}}</option>
+                {% endfor %}
+            </select>
+            <label for="sub_genre">サブジャンル</label>
+            <select id="sub_genre" name="sub_genre">
+                <option value="">すべて</option>
+                {% for item in sub_genres %}
+                    <option value="{{item}}">{{item}}</option>
+                {% endfor %}
+            </select>
+            <label for="air_date">放送月</label>
+            <input type="month" id="air_date" name="air_date" placeholder="放送日から検索">
+            <label for="season">シーズン</label>
+            <input type="number" min="1" name="season" id="season" placeholder="シーズンで検索">
+            <label for="tag">タグ</label>
+            <input type="text" name="tag" placeholder="タグ名で検索" id="tag">
+            <button type="submit">検索</button>
+        </form>
+    </div>
+    <div class="title-section">
+        <h2>検索する</h2>
+        <div class="title-container">
+        {%if keywords%}
+            {% for item in keywords%}
+            <a href="{% url 'records:search'%}?q={{item}}" class="title-item">
+                <h3>{{item}}</h3>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>おすすめのキーワードはありません</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>ジャンル</h2>
+        <div class="title-container">
+        {%if genres%}
+            {% for item in genres%}
+            <a href="{% url 'records:search'%}?genre={{item}}" class="title-item">
+                <h3>{{item}}</h3>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>ジャンルから検索できません</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>ジャンル</h2>
+        <div class="title-container">
+        {%if sub_genres%}
+            {% for item in sub_genres%}
+            <a href="{% url 'records:search'%}?genre={{item}}" class="title-item">
+                <h3>{{item}}</h3>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>サブジャンルから検索できません</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>放送月</h2>
+        <div class="title-container">
+        {%if air_date%}
+            {% for item in air_date%}
+            <a href="{% url 'records:search'%}?air_date={{item|date:'Y-m-'}}" class="title-item">
+                <h3>{{item|date:"Y年m月"}}</h3>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>放送日から検索できません</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>視聴月</h2>
+        <div class="title-container">
+        {%if watched_date%}
+            {% for item in watched_date%}
+            <a href="{% url 'records:search'%}?watched_date={{item|date:'Y-m-'}}" class="title-item">
+                <h3>{{item|date:"Y年m月"}}</h3>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>視聴日から検索できません</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>視聴状況</h2>
+        <div class="title-container">
+        {%if status%}
+            {% for item in status%}
+            <a href="{% url 'records:search'%}?status={{item.status}}" class="title-item">
+                <h3>{{item.get_status_display}}</h3>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>視聴状況から検索できません</h3>
+        {%endif%}
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>視聴方法</h2>
+        <div class="title-container">
+        {%if watch_method%}
+            {% for item in watch_method%}
+            <a href="{% url 'records:search'%}?watch_method={{item}}" class="title-item">
+                <h3>{{item}}</h3>
+            </a>
+            {% endfor %}
+        {%else%}
+            <h3>視聴状況から検索できません</h3>
+        {%endif%}
+        </div>
+    </div>
+{% endblock %}

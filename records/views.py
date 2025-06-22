@@ -328,9 +328,15 @@ def search_index_view(request):
     genres=Genre.objects.all()
     sub_genres=SubGenre.objects.all()
     air_date=Title.objects.values_list("air_date",flat=True).distinct().order_by("air_date")
+    tag=Tag.objects.all().order_by("?")[:10].values_list("name",flat=True)
+    watched_date=WatchRecord.objects.filter(user=request.user).values_list("watched_date",flat=True).distinct().order_by("watched_date")
+    status=WatchRecord.objects.all().distinct().order_by("status")
+    watch_method=WatchMethod.objects.values_list("name",flat=True).distinct().order_by("name")
     keywords=[]
     keywords.append(Genre.objects.all().order_by("?")[0].name)
-    context={"genres":genres,"sub_genres":sub_genres,"air_date":air_date,"keywords":keywords}
+    keywords.append(SubGenre.objects.all().order_by("?")[0].name)
+    keywords.extend(tag)
+    context={"genres":genres,"sub_genres":sub_genres,"air_date":air_date,"keywords":keywords,"watched_date":watched_date,"status":status,"watch_method":watch_method}
     return render(request,"records/search_index.html",context)
 class SearchView(LoginRequiredMixin,View):
     context_object_name="titles"
@@ -356,7 +362,7 @@ class SearchView(LoginRequiredMixin,View):
         watch_method=self.request.GET.get("watch_method")
         title_conditions={("genre__name",genre),("sub_genre__name",sub_genre),("season",season),("air_date__icontains",air_date),("tags__name",tag)}
         episode_conditions={("title__genre__name",genre),("title__sub_genre__name",sub_genre),("title__season",season),("episode_number",episode_number),("duration",duration),("air_date__icontains",air_date),("tags__name",tag)}
-        watch_record_conditions={("title__genre__name",genre),("title__sub_genre__name",sub_genre),("title__season",season),("title__air_date__icontains",air_date),("watched_date__icontains",watched_date),("rating",rating),("status",status),("watch_method",watch_method),("tags__name",tag)}
+        watch_record_conditions={("title__genre__name",genre),("title__sub_genre__name",sub_genre),("title__season",season),("title__air_date__icontains",air_date),("watched_date__icontains",watched_date),("rating",rating),("status",status),("watch_method__name",watch_method),("tags__name",tag)}
         episode_watch_record_conditions={("episode__title__genre__name",genre),("episode__title__sub_genre__name",sub_genre),("episode__title__season",season),("episode__title__air_date__icontains",air_date),("watched_date__icontains",watched_date),("rating",rating),("status",status),("watch_method__name",watch_method),("tags__name",tag)}
         mylist_conditions={("tags__name",tag)}
         conditions=[genre,sub_genre,season,air_date,tag,episode_number,duration,watched_date,rating,status,watch_method]
