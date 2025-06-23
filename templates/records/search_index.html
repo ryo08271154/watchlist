@@ -71,7 +71,7 @@
         <div class="title-container">
         {%if sub_genres%}
             {% for item in sub_genres%}
-            <a href="{% url 'records:search'%}?genre={{item}}" class="title-item">
+            <a href="{% url 'records:search'%}?sub_genre={{item}}" class="title-item">
                 <h3>{{item}}</h3>
             </a>
             {% endfor %}

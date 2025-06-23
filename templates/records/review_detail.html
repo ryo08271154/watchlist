@@ -6,7 +6,7 @@
     </ul>{% endif %}
     <br>
     <h1>{{watch_record.comment_title}}</h1>
-    <h2>{{watch_record.get_status_display}}|視聴日:{{watch_record.watched_date|date:"Y年m月d日"}}｜評価:{{watch_record.rating}}</h2>
+    <h2>{{watch_record.get_status_display}}｜視聴日:{{watch_record.watched_date|date:"Y年m月d日"}}｜評価:{{watch_record.rating}}</h2>
     <p>{{watch_record.comment}}</p>
     <h3><a href="{% url 'titles:title_detail' watch_record.title.id%}">{{watch_record.title}}｜シーズン{{watch_record.title.season}}</a></h3>
     <h3>タグ</h3>
