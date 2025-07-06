@@ -327,11 +327,11 @@ class TagDetailView(LoginRequiredMixin,DetailView):
 def search_index_view(request):
     genres=Genre.objects.all()
     sub_genres=SubGenre.objects.all()
-    air_date=Title.objects.all().values_list("air_date",flat=True).order_by("air_date").distinct()
+    air_date=Title.objects.all().order_by("air_date").values_list("air_date",flat=True).distinct()
     tag=Tag.objects.all().order_by("?")[:10].values_list("name",flat=True)
-    watched_date=WatchRecord.objects.filter(user=request.user).values_list("watched_date",flat=True).order_by("watched_date").distinct()
-    status=WatchRecord.objects.all().order_by("status").distinct()
-    watch_method=WatchMethod.objects.values_list("name",flat=True).order_by("name").distinct()
+    watched_date=WatchRecord.objects.filter(user=request.user).order_by("watched_date").values_list("watched_date",flat=True).distinct()
+    status=[["watching","視聴中"],["watched","視聴済み"],["not_watched","未視聴"],["dropped","視聴中断"]]
+    watch_method=WatchMethod.objects.order_by("name").values_list("name",flat=True).distinct()
     keywords=[]
     keywords.append(Genre.objects.all().order_by("?")[0].name)
     keywords.append(SubGenre.objects.all().order_by("?")[0].name)
