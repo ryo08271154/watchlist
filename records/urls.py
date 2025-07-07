@@ -25,6 +25,7 @@ urlpatterns=[
              path("search",views.SearchView.as_view(),name="search"),
 
              path("mypage",views.MypageView.as_view(),name="mypage"),
+             path("mypage/reviews",views.MyReviewListView.as_view(),name="myreview"),
              path("mypage/stats",views.MyStatsView.as_view(),name="mystats"),
 
              path("reviews/export",views.ReviewExportView.as_view(),name="review_export"),

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block title %}マイページ{% endblock %}
 {%block head%}
 <style>
     .title-container {
@@ -23,9 +24,10 @@
 {%endblock%}
 {%block content%}
 <ul><li><a href="{%url 'records:mystats'%}">統計</a></li></ul>
+<ul><li><a href="{%url 'records:myreview'%}">マイレビュー</a></li></ul>
     <h1>{%if user.nickname%}{{user.nickname}}さん{%else%}あなた{%endif%}の記録</h1>
     <div class="title-section">
-        <h2><a href="{% url 'records:search'%}?q=watching&type=record">視聴中</a></h2>
+        <h2><a href="{% url 'records:search'%}?status=watching">視聴中</a></h2>
         <div class="title-container">
         {%if watching_titles%}
             {% for item in watching_titles%}
@@ -40,7 +42,7 @@
         </div>
     </div>
     <div class="title-section">
-        <h2><a href="{% url 'records:search'%}?q=watched&type=record">視聴済み</a></h2>
+        <h2><a href="{% url 'records:search'%}?status=watched">視聴済み</a></h2>
         <div class="title-container">
         {%if watched_titles%}
             {% for item in watched_titles%}
@@ -55,7 +57,7 @@
         </div>
     </div>
     <div class="title-section">
-        <h2><a href="{% url 'records:search'%}?q=not_watched&type=record">未視聴</a></h2>
+        <h2><a href="{% url 'records:search'%}?status=not_watched">未視聴</a></h2>
         <div class="title-container">
         {%if not_watched_titles%}
             {% for item in not_watched_titles%}
@@ -70,7 +72,7 @@
         </div>
     </div>
     <div class="title-section">
-        <h2><a href="{% url 'records:search'%}?q=dropped&type=record">視聴中断</a></h2>
+        <h2><a href="{% url 'records:search'%}?status=dropped">視聴中断</a></h2>
         <div class="title-container">
         {%if dropped_titles%}
             {% for item in dropped_titles%}
@@ -85,7 +87,7 @@
         </div>
     </div>
     <div class="title-section">
-        <h2><a href="{% url 'records:search'%}?q=&type=record">視聴状況不明</a></h2>
+        <h2>視聴状況不明</h2>
         <div class="title-container">
         {%if none_watched_titles%}
             {% for item in none_watched_titles%}
