@@ -441,7 +441,12 @@ class MyReviewListView(LoginRequiredMixin,ListView):
     ordering="-watched_date"
     context_object_name="watch_records"
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user,watched_date__year=datetime.date.today().year)
+        if self.request.GET.get("year"):
+            return super().get_queryset().filter(user=self.request.user,watched_date__year=self.request.GET.get("year"))
+        else:
+            now_year=datetime.date.today()
+            last_year=now_year-relativedelta.relativedelta(years=1)
+            return super().get_queryset().filter(user=self.request.user,watched_date__range=[last_year,now_year])
     def get_context_data(self, **kwargs):
         context=super().get_context_data(**kwargs)
         context["min_year"]=WatchRecord.objects.filter(user=self.request.user).exclude(watched_date=None).order_by("watched_date").values_list("watched_date__year",flat=True).first() #最小年を取得
