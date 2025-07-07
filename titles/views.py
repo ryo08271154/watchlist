@@ -423,7 +423,7 @@ class MyWatchScheduleView(LoginRequiredMixin,View):
         days=[]
         for day in range(8):
             start_time=datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0)+datetime.timedelta(days=day)
-            end_time=start_time+datetime.timedelta(days=1)
+            end_time=start_time+datetime.timedelta(hours=23,minutes=59,seconds=59)
             queryset.append(Episode.objects.filter(air_date__range=[timezone.make_aware(start_time),timezone.make_aware(end_time)]).order_by("air_date"))
             days.append(start_time)
         data=zip(queryset,days)

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{%block title%}マイレビュー{%endblock%}
+{% block head %}
+    <style>
+        .title-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            min-height: 100px;
+        }
+    </style>
+{%endblock%}
+{%block content%}
+    <h1>{%if user.nickname%}{{user.nickname}}さん{%else%}あなた{%endif%}の{%if year%}{{year}}年{%else%}過去1年{%endif%}の記録</h1>
+    <div class="search-form">
+        <form action="{%url 'records:myreview'%}" autocomplete="off" method="get">
+        <label for="year">年</label>
+        <input type="number" min="{{min_year}}" max="{{max_year}}" value="{{request.GET.year}}" id="year" name="year" placeholder="年で検索">
+    </div>
+    {%for month in months%}
+        <div class="title-section">
+            <h2><a href="{% url 'records:search'%}?watched_date={{month|date:'Y-m'}}">{{month.year}}年{{month.month}}月</a></h2>
+            <div class="title-container">
+            {%if watch_records%}
+                {%for item in watch_records%}
+                {%if item.watched_date.year == month.year and item.watched_date.month == month.month%}
+                <a href="{% url 'records:review_detail' item.id %}" class="title-item">
+                    <h3>{{item.comment_title}}</h3>
+                    <p>{{item.title}}</p>
+                </a>
+                {%endif%}
+                {% endfor %}
+            {%else%}
+                <h3>見つかりませんでした</h3>
+            {%endif%}
+            </div>
+        </div>
+    {%endfor%}
+{%endblock%}

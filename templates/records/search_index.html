@@ -2,13 +2,66 @@
 {%block title%}検索する{%endblock%}
 {% block head %}
     <style>
-        .title-container {
+        .search-section {
+            margin: 30px 0;
+        }
+
+        .search-section h2 {
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #1976d2;
+            color: #1976d2;
+            font-size: 1.2em;
+            letter-spacing: 0.05em;
+        }
+
+        .search-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .search-item {
+            text-decoration: none;
+            color: inherit;
+            padding: 16px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.08);
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s;
             display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border: 1px solid #ccc;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-item:hover, .search-item:focus {
+            background: #e3f2fd;
+            color: #1565c0;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+        }
+
+        .search-item h3 {
+            margin: 0;
+            font-size: 1em;
+            text-align: center;
+            font-weight: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .search-form form {
+                grid-template-columns: 1fr;
+            }
+            .search-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            .search-item {
+                padding: 10px;
+                font-size: 0.95em;
+            }
         }
     </style>
 {%endblock%}
@@ -38,12 +91,12 @@
             <button type="submit">検索</button>
         </form>
     </div>
-    <div class="title-section">
+    <div class="search-section">
         <h2>検索する</h2>
-        <div class="title-container">
+        <div class="search-container">
         {%if keywords%}
             {% for item in keywords%}
-            <a href="{% url 'records:search'%}?q={{item}}" class="title-item">
+            <a href="{% url 'records:search'%}?q={{item}}" class="search-item">
                 <h3>{{item}}</h3>
             </a>
             {% endfor %}
@@ -52,12 +105,12 @@
         {%endif%}
         </div>
     </div>
-    <div class="title-section">
+    <div class="search-section">
         <h2>ジャンル</h2>
-        <div class="title-container">
+        <div class="search-container">
         {%if genres%}
             {% for item in genres%}
-            <a href="{% url 'records:search'%}?genre={{item}}" class="title-item">
+            <a href="{% url 'records:search'%}?genre={{item}}" class="search-item">
                 <h3>{{item}}</h3>
             </a>
             {% endfor %}
@@ -66,12 +119,12 @@
         {%endif%}
         </div>
     </div>
-    <div class="title-section">
-        <h2>ジャンル</h2>
-        <div class="title-container">
+    <div class="search-section">
+        <h2>サブジャンル</h2>
+        <div class="search-container">
         {%if sub_genres%}
             {% for item in sub_genres%}
-            <a href="{% url 'records:search'%}?sub_genre={{item}}" class="title-item">
+            <a href="{% url 'records:search'%}?sub_genre={{item}}" class="search-item">
                 <h3>{{item}}</h3>
             </a>
             {% endfor %}
@@ -80,12 +133,12 @@
         {%endif%}
         </div>
     </div>
-    <div class="title-section">
+    <div class="search-section">
         <h2>放送月</h2>
-        <div class="title-container">
+        <div class="search-container">
         {%if air_date%}
             {% for item in air_date%}
-            <a href="{% url 'records:search'%}?air_date={{item|date:'Y-m-'}}" class="title-item">
+            <a href="{% url 'records:search'%}?air_date={{item|date:'Y-m-'}}" class="search-item">
                 <h3>{{item|date:"Y年m月"}}</h3>
             </a>
             {% endfor %}
@@ -94,12 +147,12 @@
         {%endif%}
         </div>
     </div>
-    <div class="title-section">
+    <div class="search-section">
         <h2>視聴月</h2>
-        <div class="title-container">
+        <div class="search-container">
         {%if watched_date%}
             {% for item in watched_date%}
-            <a href="{% url 'records:search'%}?watched_date={{item|date:'Y-m-'}}" class="title-item">
+            <a href="{% url 'records:search'%}?watched_date={{item|date:'Y-m-'}}" class="search-item">
                 <h3>{{item|date:"Y年m月"}}</h3>
             </a>
             {% endfor %}
@@ -108,13 +161,13 @@
         {%endif%}
         </div>
     </div>
-    <div class="title-section">
+    <div class="search-section">
         <h2>視聴状況</h2>
-        <div class="title-container">
+        <div class="search-container">
         {%if status%}
             {% for item in status%}
-            <a href="{% url 'records:search'%}?status={{item.status}}" class="title-item">
-                <h3>{{item.get_status_display}}</h3>
+            <a href="{% url 'records:search'%}?status={{item.0}}" class="search-item">
+                <h3>{{item.1}}</h3>
             </a>
             {% endfor %}
         {%else%}
@@ -122,12 +175,12 @@
         {%endif%}
         </div>
     </div>
-    <div class="title-section">
+    <div class="search-section">
         <h2>視聴方法</h2>
-        <div class="title-container">
+        <div class="search-container">
         {%if watch_method%}
             {% for item in watch_method%}
-            <a href="{% url 'records:search'%}?watch_method={{item}}" class="title-item">
+            <a href="{% url 'records:search'%}?watch_method={{item}}" class="search-item">
                 <h3>{{item}}</h3>
             </a>
             {% endfor %}

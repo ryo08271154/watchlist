@@ -327,11 +327,11 @@ class TagDetailView(LoginRequiredMixin,DetailView):
 def search_index_view(request):
     genres=Genre.objects.all()
     sub_genres=SubGenre.objects.all()
-    air_date=Title.objects.all().values_list("air_date",flat=True).order_by("air_date").distinct()
+    air_date=Title.objects.all().order_by("air_date").values_list("air_date",flat=True).distinct()
     tag=Tag.objects.all().order_by("?")[:10].values_list("name",flat=True)
-    watched_date=WatchRecord.objects.filter(user=request.user).values_list("watched_date",flat=True).order_by("watched_date").distinct()
-    status=WatchRecord.objects.all().order_by("status").distinct()
-    watch_method=WatchMethod.objects.values_list("name",flat=True).order_by("name").distinct()
+    watched_date=WatchRecord.objects.filter(user=request.user).order_by("watched_date").values_list("watched_date",flat=True).distinct()
+    status=[["watching","視聴中"],["watched","視聴済み"],["not_watched","未視聴"],["dropped","視聴中断"]]
+    watch_method=WatchMethod.objects.order_by("name").values_list("name",flat=True).distinct()
     keywords=[]
     keywords.append(Genre.objects.all().order_by("?")[0].name)
     keywords.append(SubGenre.objects.all().order_by("?")[0].name)
@@ -375,14 +375,20 @@ class SearchView(LoginRequiredMixin,View):
         else: #検索範囲が指定されてない場合検索タイプを設定
             search_type=["title","record","episode_record","episode","mylist"]
         if genre or sub_genre or season or air_date:
-            search_type.remove("mylist")
+            if "mylist" in search_type:
+                search_type.remove("mylist")
         if episode_number or duration:
-            search_type.remove("title")
-            search_type.remove("mylist")
+            if "title" in search_type:
+                search_type.remove("title")
+            if "mylist" in search_type:
+                search_type.remove("mylist")
         if rating or status or watch_method or watched_date:
-            search_type.remove("title")
-            search_type.remove("episode")
-            search_type.remove("mylist")
+            if "title" in search_type:
+                search_type.remove("title")
+            if "episode" in search_type:
+                search_type.remove("episode")
+            if "mylist" in search_type:
+                search_type.remove("mylist")
         def apply_filters(queryset,conditions):
             for field, value in conditions:
                 if value:
@@ -429,6 +435,25 @@ class MypageView(LoginRequiredMixin,View):
         none_watched_titles=WatchRecord.objects.filter(status="",user=request.user).order_by("-updated_at")[:10]
         my_lists=MyList.objects.filter(user=request.user).order_by("-updated_at")[:10]
         return render(request,"records/mypage.html",{"watched_titles":watched_titles,"watching_titles":watching_titles,"not_watched_titles":not_watched_titles,"dropped_titles":dropped_titles,"none_watched_titles":none_watched_titles,"my_lists":my_lists})
+class MyReviewListView(LoginRequiredMixin,ListView):
+    template_name="records/myreview.html"
+    model=WatchRecord
+    ordering="-watched_date"
+    context_object_name="watch_records"
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user,watched_date__year=datetime.date.today().year)
+    def get_context_data(self, **kwargs):
+        context=super().get_context_data(**kwargs)
+        context["min_year"]=WatchRecord.objects.filter(user=self.request.user).exclude(watched_date=None).order_by("watched_date").values_list("watched_date__year",flat=True).first() #最小年を取得
+        context["max_year"]=datetime.date.today().year
+        if self.request.GET.get("year"):
+            year=datetime.date(year=int(self.request.GET.get("year")),month=12,day=1)
+            context["year"]=year.year
+        else:
+            year=datetime.date.today()
+        context["months"]=[year.replace(day=1)-relativedelta.relativedelta(months=m) for m in range(12)] #1年分の月を取得
+        return context
+
 def watched_series(request):
     watched=WatchRecord.objects.filter(user=request.user,status="watched")
     watched_series=[]
