@@ -15,7 +15,7 @@
 {%block content%}
     {% if "title" in search_type%}
     <div class="title-section">
-        <h2><a href="?q={{request.GET.q}}&type=title">タイトル</a></h2>
+        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&tag={{request.GET.tag}}&type=title">タイトル</a></h2>
         <p>{{titles.count}}件</p>
         <div class="title-container">
         {%if titles%}
@@ -33,7 +33,7 @@
     {% endif %}
     {% if "episode" in search_type%}
     <div class="title-section">
-        <h2><a href="?q={{request.GET.q}}&type=episode">エピソード</a></h2>
+        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&tag={{request.GET.tag}}&episode_number={{request.GET.episode_number}}&duration={{request.GET.duration}}&type=episode">エピソード</a></h2>
         <p>{{episodes.count}}件</p>
         <div class="title-container">
         {%if episodes%}
@@ -54,7 +54,7 @@
     {% endif %}
     {% if "record" in search_type%}
     <div class="title-section">
-        <h2><a href="?q={{request.GET.q}}&type=record">レビュー</a></h2>
+        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&watched_date={{request.GET.watched_date}}&rating={{request.GET.rating}}&status={{request.GET.status}}&watchmethod={{request.GET.watchmethod}}&tag={{request.GET.tag}}&type=record">レビュー</a></h2>
         <p>{{watch_records.count}}件</p>
         <div class="title-container">
         {%if watch_records%}
@@ -72,7 +72,7 @@
     {% endif %}
     {% if "episode_record" in search_type%}
     <div class="title-section">
-        <h2><a href="?q={{request.GET.q}}&type=episode_record">エピソードレビュー</a></h2>
+        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&watched_date={{request.GET.watched_date}}&rating={{request.GET.rating}}&status={{request.GET.status}}&watchmethod={{request.GET.watchmethod}}&tag={{request.GET.tag}}&type=episode_record">エピソードレビュー</a></h2>
         <p>{{episode_watch_records.count}}件</p>
         <div class="title-container">
         {%if episode_watch_records%}
@@ -90,7 +90,7 @@
     {% endif %}
     {% if "mylist" in search_type%}
     <div class="title-section">
-        <h2><a href="?q={{request.GET.q}}&type=mylist">マイリスト</a></h2>
+        <h2><a href="?q={{request.GET.q}}&tag={{request.GET.tag}}&type=mylist">マイリスト</a></h2>
         <p>{{my_list.count}}件</p>
         <div class="title-container">
         {%if my_list%}

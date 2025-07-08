@@ -357,7 +357,7 @@ def syoboi_calender_episode_get(title,selected_titles_id,title_episodes):
                 episode_number=int(item.find("Count").text)
                 pid=item.find("PID").text
                 episode_search=title_episodes.filter(episode_number=episode_number) #同じのが登録されてないか探す
-                if episode_search.count()>=1 and episode_search.first().episode_title==None and item.find("STSubTitle").text:
+                if episode_search.count()>=1 and episode_search.first().episode_title=="" and item.find("STSubTitle").text:
                     #同じのが登録されていてエピソードタイトルが登録されていない場合登録する
                     episode=episode_search.first()
                     episode.episode_title=item.find("STSubTitle").text
@@ -423,7 +423,7 @@ class MyWatchScheduleView(LoginRequiredMixin,View):
         days=[]
         for day in range(8):
             start_time=datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0)+datetime.timedelta(days=day)
-            end_time=start_time+datetime.timedelta(days=1)
+            end_time=start_time+datetime.timedelta(hours=23,minutes=59,seconds=59)
             queryset.append(Episode.objects.filter(air_date__range=[timezone.make_aware(start_time),timezone.make_aware(end_time)]).order_by("air_date"))
             days.append(start_time)
         data=zip(queryset,days)
