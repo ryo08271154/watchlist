@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.db.models import ManyToOneRel,ManyToManyRel,UUIDField
 from .models import Title,Episode,Tag,Genre,SubGenre
 from .forms import TitleForm,EpisodeForm,TitleFileImportForm,EpisodeFileImportForm,SourceSelectForm,SourceSearchForm
+from .utils.embed import generate_embed_html
 
 import csv
 import io
@@ -99,6 +100,7 @@ class TitleDetailView(LoginRequiredMixin,DetailView):
     def get_context_data(self, **kwargs):
         context=super().get_context_data(**kwargs)
         context["episodes"]=Episode.objects.filter(title=self.get_object())
+        context["videos"]=generate_embed_html(self.get_object().content)
         return context
 #タイトル追加
 class TitleCreateView(LoginRequiredMixin,CreateView):
