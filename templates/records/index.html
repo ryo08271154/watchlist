@@ -33,7 +33,7 @@
             {%else%}
             <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
                 <h3>{{item.title}}</h3>
-                <p>{{item.content}}</p>
+                <p>{{item.content_without_url|safe|linebreaksbr}}</p>
             </a>
             {% endif %}
             {% endfor %}

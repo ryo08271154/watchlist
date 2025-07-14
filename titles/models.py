@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+import re
 class Genre(models.Model):
     name=models.CharField(max_length=50,unique=True,verbose_name="ジャンル名")
     description=models.TextField(blank=True,verbose_name="ジャンル説明")
@@ -48,6 +49,10 @@ class Title(models.Model):
     tags=models.ManyToManyField(Tag,blank=True,verbose_name="タグ")
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
+    @property
+    def content_without_url(self):
+        text=re.sub(r'https?://[\w/:%#$&?()~.=+-]+', '', self.content)
+        return ' '.join(text.split())
     class Meta:
         verbose_name="タイトル"
         verbose_name_plural="タイトル"
