@@ -8,7 +8,7 @@ def generate_embed_html(text) -> list:
     for url in urls:
         video_id = None
         playlist_id = None
-        host=urlparse(url).netloc
+        host=urlparse(url).hostname
         if host.endswith("youtube.com") or host.endswith("youtu.be"):
             if "youtube.com/watch?v=" in url:
                 video_id = url.split("?v=")[1][:12] #動画idは必ず11桁
