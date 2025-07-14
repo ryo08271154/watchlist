@@ -22,7 +22,7 @@ def generate_embed_html(text) -> list:
             if "nicovideo.jp/watch/" in url:
                 video_id = url.split("/")[4]
                 embed_html.append(f'<script type="application/javascript" src="https://embed.nicovideo.jp/watch/{video_id}/script?w=320&h=180"></script><noscript><a href="https://www.nicovideo.jp/watch/{video_id}">https://www.nicovideo.jp/watch/{video_id}</a></noscript>')
-            if "ch.nicovideo.jp/ch" in url:
+            if "ch.nicovideo.jp/" in url:
                 channel_id = url.split("/")[3]
                 embed_html.append(f'<iframe src="https://ch.nicovideo.jp/{channel_id}/thumb_channel" width="312" height="176" frameborder="0" scrolling="no"></iframe>')
     return embed_html

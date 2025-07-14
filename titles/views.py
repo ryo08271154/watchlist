@@ -296,17 +296,18 @@ class TitleSourceImportView(LoginRequiredMixin,FormView):
             self.request.session["search_q"]=self.request.GET.get("q")
         return form
     def form_valid(self, form):
-        GENRE_ID={"1":"アニメ","2":"ラジオ","3":"テレビ","4":"特撮","5":"アニメ関連番組","7":"アニメOVA","8":"映画","9":"アニメ","10":"アニメ"}
         titles=[]
-        selected_titles_id=form.cleaned_data["titles"]
-        search_titles=syoboi_calender_title_get(",".join("".join(str(i)) for i in selected_titles_id))
-        for search_title in search_titles:
-            if self.request.GET.get("source")=="syoboi_calender":
+        if self.request.GET.get("source")=="syoboi_calender":
+            GENRE_ID={"1":"アニメ","2":"ラジオ","3":"テレビ","4":"特撮","5":"アニメ関連番組","7":"アニメOVA","8":"映画","9":"アニメ","10":"アニメ"}
+            selected_titles_id=form.cleaned_data["titles"]
+            search_titles=syoboi_calender_title_get(",".join("".join(str(i)) for i in selected_titles_id))
+            for search_title in search_titles:
                 title_name=search_title["Title"]
                 genre,created=Genre.objects.get_or_create(name=GENRE_ID[search_title["Cat"]])
                 season=re.search(r"(\d+)",search_title["ShortTitle"])
                 air_date=datetime.date(int(search_title["FirstYear"]),int(search_title["FirstMonth"]),1)
                 website=re.search(r'\[\[公式\s+(\S+)\]\]',search_title["Comment"])
+                media_urls=re.findall(r'\[\[(|Twitter.*?|X.*?|YouTube.*?|ニコニコ.*?)\s+(\S+)\]\]',search_title["Comment"])
                 tid=search_title["TID"]
                 title_search=Title.objects.filter(title=search_title["Title"],season=int(season.group()) if season else 1) #同じのが登録されてないか探す
                 if title_search.count()>=1:
@@ -316,7 +317,7 @@ class TitleSourceImportView(LoginRequiredMixin,FormView):
                     title=Title(
                         title=title_name,
                         title_kana=search_title["TitleYomi"],
-                        content="",
+                        content="".join(url for name,url in media_urls),
                         genre=genre,
                         season=int(season.group()) if season else 1,
                         air_date=air_date,
