@@ -346,7 +346,7 @@ def syoboi_calender_episode_get(title,selected_titles_id,title_episodes):
     root=ET.fromstring(r.text)
     items=sorted(root.findall(".//ProgItem"),key=lambda x: int(x.find("TID").text)) #タイトルidで並べ替え
     items=sorted(root.findall(".//ProgItem"),key=lambda x: datetime.datetime.strptime(x.find("StTime").text,"%Y-%m-%d %H:%M:%S")) #放送開始時間順に並べ替え
-    target_count=1
+    target_count=int(sorted(root.findall(".//ProgItem"),key=lambda x: int(x.find("Count").text or 999))[0].find("Count").text) #最小の回数を求める
     episodes=[]
     update_episodes=[]
     while True:
