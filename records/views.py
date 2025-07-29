@@ -468,6 +468,8 @@ def watched_series(request):
         if not any(keyword in title_name or title_name in keyword for keyword in added_keywords):
             watched_series.append(title)
             added_keywords.add(title.title.title)
+            for related_title in title.title.related_titles.all():
+                added_keywords.add(related_title.title)
     return len(watched_series)
 def watched_month(request,month):
     month_watched_count=[]
@@ -525,13 +527,12 @@ class MyStatsView(LoginRequiredMixin,View):
         total_watched=WatchRecord.objects.filter(user=request.user,status="watched").values("title").distinct().count()
         watched_count=WatchRecord.objects.filter(user=request.user,status="watched").count()
         total_watched_series=watched_series(request)
-        watched_series_count=WatchRecord.objects.filter(user=request.user,status="watched").count()
         total_episode=EpisodeWatchRecord.objects.filter(user=request.user,status="watched").values("episode").distinct().count()
         episode_count=EpisodeWatchRecord.objects.filter(user=request.user,status="watched").count()
         total_duration,watched_duration_graph=watched_duration(request,month)
         watched_graph=watched_month(request,month)
         watched_season_graph=watched_season(request)
-        return render(request,"records/mystats.html",{"total_watched":total_watched,"watched_count":watched_count,"total_watched_series":total_watched_series,"watched_series_count":watched_series_count,"episode_count":episode_count,"total_episode":total_episode,"total_duration":total_duration,"watched_graph":watched_graph,"watched_duration_graph":watched_duration_graph,"watched_season_graph":watched_season_graph})
+        return render(request,"records/mystats.html",{"total_watched":total_watched,"watched_count":watched_count,"total_watched_series":total_watched_series,"episode_count":episode_count,"total_episode":total_episode,"total_duration":total_duration,"watched_graph":watched_graph,"watched_duration_graph":watched_duration_graph,"watched_season_graph":watched_season_graph})
 class ReviewExportView(BaseExportView):
     model=WatchRecord
     order_by="watched_date"
