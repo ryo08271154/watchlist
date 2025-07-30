@@ -26,3 +26,5 @@ class ReviewFileImportForm(forms.Form):
     rating_column=forms.IntegerField(label="評価列",min_value=1)
     status_column=forms.IntegerField(label="視聴状況列",min_value=1)
     watch_method_column=forms.IntegerField(label="視聴方法列",min_value=1)
+class ExportForm(forms.Form):
+    fields=forms.MultipleChoiceField(label="エクスポートする項目",widget=forms.CheckboxSelectMultiple,choices=[])

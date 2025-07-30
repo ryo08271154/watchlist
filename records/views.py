@@ -1,11 +1,11 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from django.views import View
-from django.views.generic import ListView,DetailView,CreateView,UpdateView,FormView
+from django.views.generic import ListView,DetailView,CreateView,UpdateView,FormView,TemplateView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import WatchRecord,EpisodeWatchRecord,MyList,WatchMethod
-from .forms import ReviewForm,EpisodeReviewForm,MyListForm,ReviewFileImportForm
+from .forms import ReviewForm,EpisodeReviewForm,MyListForm,ReviewFileImportForm,ExportForm
 from titles.models import Title,Genre,SubGenre,Tag,Episode
 from titles.views import BaseExportView,csv_file_read,tags_add
 from django.db.models import Q,Sum
@@ -548,3 +548,18 @@ class MyListExportView(BaseExportView):
     order_by="created_at"
     def get_filter_kwargs(self):
         return {"user":self.request.user}
+class ExportView(LoginRequiredMixin,TemplateView):
+    template_name="records/export.html"
+    def get_context_data(self, **kwargs):
+        context=super().get_context_data(**kwargs)
+        forms=[]
+        export_models=[(Title,"titles","タイトル"),(Episode,"episodes","エピソード"),(WatchRecord,"reviews","レビュー"),(EpisodeWatchRecord,"episode_reviews","エピソードレビュー"),(MyList,"mylists","マイリスト")]
+        for export_model,export_model_name,display_name in export_models:
+            form=ExportForm()
+            form.auto_id=False #同じ名前の選択肢があるため
+            choices=[(field.name,field.verbose_name) for field in export_model._meta.fields]
+            form.fields["fields"].choices=choices
+            form.initial["fields"]=[choice for choice,_ in choices]
+            forms.append((form,export_model_name,display_name))
+        context["forms"]=forms
+        return context

@@ -26,7 +26,7 @@ class BaseExportView(LoginRequiredMixin,View):
         return {}
     def get(self,request):
         response=HttpResponse(content_type="text/csv;")
-        self.fields=request.GET.get("fields").split(",") if request.GET.get("fields") else []
+        self.fields=request.GET.getlist("fields") if request.GET.getlist("fields") else []
         filter_kwargs=self.get_filter_kwargs()
         export_data=self.model.objects.filter(**filter_kwargs).order_by(self.order_by).distinct()
         writer=csv.writer(response)

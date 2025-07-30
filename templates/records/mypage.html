@@ -23,9 +23,12 @@
 </style>
 {%endblock%}
 {%block content%}
-<ul><li><a href="{%url 'records:mystats'%}">統計</a></li></ul>
-<ul><li><a href="{%url 'records:myreview'%}">マイレビュー</a></li></ul>
     <h1>{%if user.nickname%}{{user.nickname}}さん{%else%}あなた{%endif%}の記録</h1>
+    <ul>
+        <li><a href="{%url 'records:mystats'%}">統計</a></li>
+        <li><a href="{%url 'records:myreview'%}">マイレビュー</a></li>
+        <li><a href="{%url 'records:export'%}">データエクスポート</a></li>
+    </ul>
     <div class="title-section">
         <h2><a href="{% url 'records:search'%}?status=watching">視聴中</a></h2>
         <div class="title-container">
