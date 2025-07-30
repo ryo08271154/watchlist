@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
 from django.http import HttpResponse
-from django.db.models import ManyToOneRel,ManyToManyRel,UUIDField
+from django.db.models import ManyToOneRel,ManyToManyRel,UUIDField,ManyToManyField
 from .models import Title,Episode,Tag,Genre,SubGenre
 from .forms import TitleForm,EpisodeForm,TitleFileImportForm,EpisodeFileImportForm,SourceSelectForm,SourceSearchForm
 
@@ -21,20 +21,31 @@ import re
 class BaseExportView(LoginRequiredMixin,View):
     model=None
     order_by="air_date"
+    fields=[]
     def get_filter_kwargs(self):
         return {}
     def get(self,request):
         response=HttpResponse(content_type="text/csv;")
+        self.fields=request.GET.get("fields").split(",") if request.GET.get("fields") else []
         filter_kwargs=self.get_filter_kwargs()
         export_data=self.model.objects.filter(**filter_kwargs).order_by(self.order_by).distinct()
         writer=csv.writer(response)
-        fields=[]
-        for field in self.model._meta.get_fields():
-            if not isinstance(field,(ManyToOneRel,ManyToManyRel)):
-                fields.append(field.name)
-        writer.writerow(fields)
-        for row in export_data.all().values(*fields):
-            writer.writerow([row[field] for field in fields])
+        if not self.fields:
+            for field in self.model._meta.get_fields():
+                if not isinstance(field,(ManyToOneRel,ManyToManyRel)):
+                    self.fields.append(field.name)
+        writer.writerow(self.fields)
+        for data in export_data.all():
+            row=[]
+            for field_name in self.fields:
+                field_obj=self.model._meta.get_field(field_name)
+                data_field=getattr(data,field_name)
+                if isinstance(field_obj,ManyToManyField):
+                    value=";".join(str(i) for i in data_field.all())
+                else:
+                    value=data_field
+                row.append(value)
+            writer.writerow(row)
         return response
 
 def related_titles_add(title):

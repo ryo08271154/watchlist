@@ -16,6 +16,6 @@ urlpatterns=[path("titles/",views.TitleListView.as_view(),name="title_list"),
              path("episode/<uuid:pk>/edit",views.EpisodeEditView.as_view(),name="episode_edit"),
              path("watch_schedule",views.MyWatchScheduleView.as_view(),name="watch_schedule"),
 
-            path("titles/export",views.TitleExportView.as_view(),name="title_export"),
-            path("episodes/export",views.EpisodeExportView.as_view(),name="episode_export")
+            path("export/titles",views.TitleExportView.as_view(),name="title_export"),
+            path("export/episodes",views.EpisodeExportView.as_view(),name="episode_export")
             ]
