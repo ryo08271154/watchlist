@@ -28,9 +28,9 @@ def create_graph(x=[],y=[],x_label="",y_label="",title="",figsize=(8,6),locator=
     ax=fig.add_subplot()
     ax.bar(x,y)
     ax.yaxis.set_major_locator(locator)
-    ax.set_xlabel(x_label,fontname="Noto Sans JP",rotation=90,labelpad=10)
-    ax.set_ylabel(y_label,fontname="Noto Sans JP",rotation=90,labelpad=10)
-    ax.set_title(title,fontname="Noto Sans JP")
+    ax.set_xlabel(x_label,rotation=90,labelpad=10)
+    ax.set_ylabel(y_label,rotation=90,labelpad=10)
+    ax.set_title(title)
     fig.tight_layout()
     fig.autofmt_xdate()
     buffer=io.BytesIO()
@@ -478,7 +478,7 @@ def watched_month(request,month):
         month_watched=WatchRecord.objects.filter(user=request.user,watched_date__year=m.year,watched_date__month=m.month,status="watched")
         month_watched_count.append(month_watched.count())
         label_month.append(m.strftime("%m"))
-    return create_graph(label_month,month_watched_count,"月","視聴数","月間視聴タイトル数")
+    return create_graph(label_month,month_watched_count,"month","number of views","Number of titles viewed per month")
 def watched_season(request): #時期別視聴数
     month=[]
     month_watched_count=[]
@@ -500,7 +500,7 @@ def watched_season(request): #時期別視聴数
                 temp_count+=1
         month_watched_count.append(temp_count)
         label_month.append((m.strftime("%Y %m")).replace(" 01"," winter").replace(" 04"," spring").replace(" 07"," summer").replace(" 10"," fall"))
-    return create_graph(label_month,month_watched_count,"時期","視聴数","放送時期別視聴数",figsize=(20,6))
+    return create_graph(label_month,month_watched_count,"season","number of views","Viewership by broadcast period",figsize=(20,6))
 def total_watched_duration(reviews): #合計時間を調べる
     total_duration=0
     for review in reviews:
@@ -517,7 +517,7 @@ def watched_duration(request,month): #月間視聴時間グラフとすべての
         month_total_duration=total_watched_duration(month_watched)
         month_watched_duration.append(month_total_duration) #エピソードすべての合計時間
         label_month.append(m.strftime("%m"))
-    return total_duration,create_graph(label_month,month_watched_duration,"月","視聴時間","月間視聴時間",locator=ticker.AutoLocator())
+    return total_duration,create_graph(label_month,month_watched_duration,"month","viewing time","monthly viewing time",locator=ticker.AutoLocator())
 class MyStatsView(LoginRequiredMixin,View):
     def get(self,request):
         month=[]

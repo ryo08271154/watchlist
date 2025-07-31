@@ -5,7 +5,7 @@
         <li><a href="{% url 'records:episode_review_edit' watch_record.pk%}">レビュー編集</a></li>
     </ul>{% endif %}
     <h1>{{watch_record.comment_title}}</h1>
-    <h2>{{watch_record.get_status_display}}｜評価:{{watch_record.rating}}</h2>
+    <h2>{{watch_record.get_status_display}}｜視聴日:{{watch_record.watched_date|date:"Y年m月d日"}}｜評価:{{watch_record.rating}}</h2>
     <p>{{watch_record.comment}}</p>
     <h3><a href="{% url 'titles:episode_detail' watch_record.episode.pk%}">{{watch_record.episode.title}}｜シーズン{{watch_record.episode.title.season}}</a></h3>
     <h3>タグ</h3>

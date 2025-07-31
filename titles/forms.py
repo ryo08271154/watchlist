@@ -5,10 +5,12 @@ class TitleForm(ModelForm):
     class Meta:
         model=Title
         fields=["title","title_kana","short_title","content","genre","sub_genre","season","air_date","website","related_titles","tags"]
+        widgets={"air_date":forms.DateInput(attrs={"type":"date"})}
 class EpisodeForm(ModelForm):
     class Meta:
         model=Episode
         fields=["episode_title","episode_number","content","air_date","duration","tags",]
+        widgets={"air_date":forms.DateTimeInput(attrs={"type":"datetime-local"})}
 class TagForm(ModelForm):
     class Meta:
         model=Tag
