@@ -5,10 +5,12 @@ class ReviewForm(ModelForm):
     class Meta:
         model=WatchRecord
         fields=["comment_title","comment","watched_date","rating","status","watch_method","tags"]
+        widgets={"watched_date":forms.DateInput(attrs={"type":"date"})}
 class EpisodeReviewForm(ModelForm):
     class Meta:
         model=EpisodeWatchRecord
         fields=["comment_title","comment","watched_date","rating","status","watch_method","tags"]
+        widgets={"watched_date":forms.DateInput(attrs={"type":"date"})}
 class MyListForm(ModelForm):
     class Meta:
         model=MyList
@@ -26,3 +28,5 @@ class ReviewFileImportForm(forms.Form):
     rating_column=forms.IntegerField(label="評価列",min_value=1)
     status_column=forms.IntegerField(label="視聴状況列",min_value=1)
     watch_method_column=forms.IntegerField(label="視聴方法列",min_value=1)
+class ExportForm(forms.Form):
+    fields=forms.MultipleChoiceField(label="エクスポートする項目",widget=forms.CheckboxSelectMultiple,choices=[])
