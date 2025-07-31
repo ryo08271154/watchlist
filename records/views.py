@@ -1,11 +1,11 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from django.views import View
-from django.views.generic import ListView,DetailView,CreateView,UpdateView,FormView
+from django.views.generic import ListView,DetailView,CreateView,UpdateView,FormView,TemplateView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import WatchRecord,EpisodeWatchRecord,MyList,WatchMethod
-from .forms import ReviewForm,EpisodeReviewForm,MyListForm,ReviewFileImportForm
+from .forms import ReviewForm,EpisodeReviewForm,MyListForm,ReviewFileImportForm,ExportForm
 from titles.models import Title,Genre,SubGenre,Tag,Episode
 from titles.views import BaseExportView,csv_file_read,tags_add
 from django.db.models import Q,Sum
@@ -28,9 +28,9 @@ def create_graph(x=[],y=[],x_label="",y_label="",title="",figsize=(8,6),locator=
     ax=fig.add_subplot()
     ax.bar(x,y)
     ax.yaxis.set_major_locator(locator)
-    ax.set_xlabel(x_label,fontname="Noto Sans JP",rotation=90,labelpad=10)
-    ax.set_ylabel(y_label,fontname="Noto Sans JP",rotation=90,labelpad=10)
-    ax.set_title(title,fontname="Noto Sans JP")
+    ax.set_xlabel(x_label,rotation=90,labelpad=10)
+    ax.set_ylabel(y_label,rotation=90,labelpad=10)
+    ax.set_title(title)
     fig.tight_layout()
     fig.autofmt_xdate()
     buffer=io.BytesIO()
@@ -468,6 +468,8 @@ def watched_series(request):
         if not any(keyword in title_name or title_name in keyword for keyword in added_keywords):
             watched_series.append(title)
             added_keywords.add(title.title.title)
+            for related_title in title.title.related_titles.all():
+                added_keywords.add(related_title.title)
     return len(watched_series)
 def watched_month(request,month):
     month_watched_count=[]
@@ -476,7 +478,7 @@ def watched_month(request,month):
         month_watched=WatchRecord.objects.filter(user=request.user,watched_date__year=m.year,watched_date__month=m.month,status="watched")
         month_watched_count.append(month_watched.count())
         label_month.append(m.strftime("%m"))
-    return create_graph(label_month,month_watched_count,"月","視聴数","月間視聴タイトル数")
+    return create_graph(label_month,month_watched_count,"month","number of views","Number of titles viewed per month")
 def watched_season(request): #時期別視聴数
     month=[]
     month_watched_count=[]
@@ -498,7 +500,7 @@ def watched_season(request): #時期別視聴数
                 temp_count+=1
         month_watched_count.append(temp_count)
         label_month.append((m.strftime("%Y %m")).replace(" 01"," winter").replace(" 04"," spring").replace(" 07"," summer").replace(" 10"," fall"))
-    return create_graph(label_month,month_watched_count,"時期","視聴数","放送時期別視聴数",figsize=(20,6))
+    return create_graph(label_month,month_watched_count,"season","number of views","Viewership by broadcast period",figsize=(20,6))
 def total_watched_duration(reviews): #合計時間を調べる
     total_duration=0
     for review in reviews:
@@ -515,7 +517,7 @@ def watched_duration(request,month): #月間視聴時間グラフとすべての
         month_total_duration=total_watched_duration(month_watched)
         month_watched_duration.append(month_total_duration) #エピソードすべての合計時間
         label_month.append(m.strftime("%m"))
-    return total_duration,create_graph(label_month,month_watched_duration,"月","視聴時間","月間視聴時間",locator=ticker.AutoLocator())
+    return total_duration,create_graph(label_month,month_watched_duration,"month","viewing time","monthly viewing time",locator=ticker.AutoLocator())
 class MyStatsView(LoginRequiredMixin,View):
     def get(self,request):
         month=[]
@@ -525,13 +527,12 @@ class MyStatsView(LoginRequiredMixin,View):
         total_watched=WatchRecord.objects.filter(user=request.user,status="watched").values("title").distinct().count()
         watched_count=WatchRecord.objects.filter(user=request.user,status="watched").count()
         total_watched_series=watched_series(request)
-        watched_series_count=WatchRecord.objects.filter(user=request.user,status="watched").count()
         total_episode=EpisodeWatchRecord.objects.filter(user=request.user,status="watched").values("episode").distinct().count()
         episode_count=EpisodeWatchRecord.objects.filter(user=request.user,status="watched").count()
         total_duration,watched_duration_graph=watched_duration(request,month)
         watched_graph=watched_month(request,month)
         watched_season_graph=watched_season(request)
-        return render(request,"records/mystats.html",{"total_watched":total_watched,"watched_count":watched_count,"total_watched_series":total_watched_series,"watched_series_count":watched_series_count,"episode_count":episode_count,"total_episode":total_episode,"total_duration":total_duration,"watched_graph":watched_graph,"watched_duration_graph":watched_duration_graph,"watched_season_graph":watched_season_graph})
+        return render(request,"records/mystats.html",{"total_watched":total_watched,"watched_count":watched_count,"total_watched_series":total_watched_series,"episode_count":episode_count,"total_episode":total_episode,"total_duration":total_duration,"watched_graph":watched_graph,"watched_duration_graph":watched_duration_graph,"watched_season_graph":watched_season_graph})
 class ReviewExportView(BaseExportView):
     model=WatchRecord
     order_by="watched_date"
@@ -547,3 +548,18 @@ class MyListExportView(BaseExportView):
     order_by="created_at"
     def get_filter_kwargs(self):
         return {"user":self.request.user}
+class ExportView(LoginRequiredMixin,TemplateView):
+    template_name="records/export.html"
+    def get_context_data(self, **kwargs):
+        context=super().get_context_data(**kwargs)
+        forms=[]
+        export_models=[(Title,"titles","タイトル"),(Episode,"episodes","エピソード"),(WatchRecord,"reviews","レビュー"),(EpisodeWatchRecord,"episode_reviews","エピソードレビュー"),(MyList,"mylists","マイリスト")]
+        for export_model,export_model_name,display_name in export_models:
+            form=ExportForm()
+            form.auto_id=False #同じ名前の選択肢があるため
+            choices=[(field.name,field.verbose_name) for field in export_model._meta.fields]
+            form.fields["fields"].choices=choices
+            form.initial["fields"]=[choice for choice,_ in choices]
+            forms.append((form,export_model_name,display_name))
+        context["forms"]=forms
+        return context

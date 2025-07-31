@@ -22,7 +22,7 @@
             {% for item in titles%}
             <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
                 <h3>{{item.title}}</h3>
-                <p>{{item.content}}</p>
+                <p>{{item.content_without_url|safe|linebreaksbr}}</p>
             </a>
             {% endfor %}
         {%else%}
@@ -54,7 +54,7 @@
     {% endif %}
     {% if "record" in search_type%}
     <div class="title-section">
-        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&watched_date={{request.GET.watched_date}}&rating={{request.GET.rating}}&status={{request.GET.status}}&watchmethod={{request.GET.watchmethod}}&tag={{request.GET.tag}}&type=record">レビュー</a></h2>
+        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&watched_date={{request.GET.watched_date}}&rating={{request.GET.rating}}&status={{request.GET.status}}&watch_method={{request.GET.watch_method}}&tag={{request.GET.tag}}&type=record">レビュー</a></h2>
         <p>{{watch_records.count}}件</p>
         <div class="title-container">
         {%if watch_records%}
@@ -72,7 +72,7 @@
     {% endif %}
     {% if "episode_record" in search_type%}
     <div class="title-section">
-        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&watched_date={{request.GET.watched_date}}&rating={{request.GET.rating}}&status={{request.GET.status}}&watchmethod={{request.GET.watchmethod}}&tag={{request.GET.tag}}&type=episode_record">エピソードレビュー</a></h2>
+        <h2><a href="?q={{request.GET.q}}&genre={{request.GET.genre}}&sub_genre={{request.GET.sub_genre}}&season={{request.GET.season}}&air_date={{request.GET.air_date}}&watched_date={{request.GET.watched_date}}&rating={{request.GET.rating}}&status={{request.GET.status}}&watch_method={{request.GET.watch_method}}&tag={{request.GET.tag}}&type=episode_record">エピソードレビュー</a></h2>
         <p>{{episode_watch_records.count}}件</p>
         <div class="title-container">
         {%if episode_watch_records%}
