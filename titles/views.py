@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.db.models import ManyToOneRel,ManyToManyRel,UUIDField,ManyToManyField
 from .models import Title,Episode,Tag,Genre,SubGenre
 from .forms import TitleForm,EpisodeForm,TitleFileImportForm,EpisodeFileImportForm,SourceSelectForm,SourceSearchForm
+from .utils.embed import generate_embed_html
 
 import csv
 import io
@@ -110,6 +111,7 @@ class TitleDetailView(LoginRequiredMixin,DetailView):
     def get_context_data(self, **kwargs):
         context=super().get_context_data(**kwargs)
         context["episodes"]=Episode.objects.filter(title=self.get_object())
+        context["videos"]=generate_embed_html(self.get_object().content)
         return context
 #タイトル追加
 class TitleCreateView(LoginRequiredMixin,CreateView):
@@ -305,17 +307,18 @@ class TitleSourceImportView(LoginRequiredMixin,FormView):
             self.request.session["search_q"]=self.request.GET.get("q")
         return form
     def form_valid(self, form):
-        GENRE_ID={"1":"アニメ","2":"ラジオ","3":"テレビ","4":"特撮","5":"アニメ関連番組","7":"アニメOVA","8":"映画","9":"アニメ","10":"アニメ"}
         titles=[]
-        selected_titles_id=form.cleaned_data["titles"]
-        search_titles=syoboi_calender_title_get(",".join("".join(str(i)) for i in selected_titles_id))
-        for search_title in search_titles:
-            if self.request.GET.get("source")=="syoboi_calender":
+        if self.request.GET.get("source")=="syoboi_calender":
+            GENRE_ID={"1":"アニメ","2":"ラジオ","3":"テレビ","4":"特撮","5":"アニメ関連番組","7":"アニメOVA","8":"映画","9":"アニメ","10":"アニメ"}
+            selected_titles_id=form.cleaned_data["titles"]
+            search_titles=syoboi_calender_title_get(",".join("".join(str(i)) for i in selected_titles_id))
+            for search_title in search_titles:
                 title_name=search_title["Title"]
                 genre,created=Genre.objects.get_or_create(name=GENRE_ID[search_title["Cat"]])
                 season=re.search(r"(\d+)",search_title["ShortTitle"])
                 air_date=datetime.date(int(search_title["FirstYear"]),int(search_title["FirstMonth"]),1)
                 website=re.search(r'\[\[公式\s+(\S+)\]\]',search_title["Comment"])
+                media_urls=re.findall(r'\[\[(|Twitter.*?|X.*?|YouTube.*?|ニコニコ.*?)\s+(\S+)\]\]',search_title["Comment"])
                 tid=search_title["TID"]
                 title_search=Title.objects.filter(title=search_title["Title"],season=int(season.group()) if season else 1) #同じのが登録されてないか探す
                 if title_search.count()>=1:
@@ -325,7 +328,7 @@ class TitleSourceImportView(LoginRequiredMixin,FormView):
                     title=Title(
                         title=title_name,
                         title_kana=search_title["TitleYomi"],
-                        content="",
+                        content="".join(url for name,url in media_urls),
                         genre=genre,
                         season=int(season.group()) if season else 1,
                         air_date=air_date,
@@ -354,7 +357,7 @@ def syoboi_calender_episode_get(title,selected_titles_id,title_episodes):
     root=ET.fromstring(r.text)
     items=sorted(root.findall(".//ProgItem"),key=lambda x: int(x.find("TID").text)) #タイトルidで並べ替え
     items=sorted(root.findall(".//ProgItem"),key=lambda x: datetime.datetime.strptime(x.find("StTime").text,"%Y-%m-%d %H:%M:%S")) #放送開始時間順に並べ替え
-    target_count=1
+    target_count=int(sorted(root.findall(".//ProgItem"),key=lambda x: int(x.find("Count").text or 999))[0].find("Count").text) #最小の回数を求める
     episodes=[]
     update_episodes=[]
     while True:

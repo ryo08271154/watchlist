@@ -19,7 +19,7 @@
     </ul>
     <h1>{{title.title}}</h1>
     <h2><a href="{% url 'records:search' %}?q={{title.air_date|date:'Y-m-'}}">{{title.air_date|date:"Y年m月"}}</a>｜シーズン{{title.season}}</h2>
-    <p>{{title.content}}</p>
+    <p>{{title.content_without_url|safe|linebreaksbr}}</p>
     {%if title.source_website%}<p>データ取得元：{{title.source_website}}</p>{%endif%}
     <ul>
         <li><a href="{% url 'records:title_review_list' title.id %}">レビュー</a></li>
@@ -44,7 +44,21 @@
         {%endif%}
         </div>
     </div>
-
+    <div class="title-section">
+        <h2>動画（外部サイト）</h2>
+        <p>{{videos|length}}件</p>
+        <div class="title-container">
+        {%if videos%}
+            {% for item in videos%}
+            <div class="episode-item">
+                {{item|safe}}
+            </div>
+            {% endfor %}
+        {%else%}
+            <h3>現在表示できるデータがありません。データが追加されるとここに表示されます。</h3>
+        {%endif%}
+        </div>
+    </div>
 
     {% if title.related_titles.all%}
     <div class="title-section">
@@ -54,7 +68,7 @@
             {% for item in title.related_titles.all%}
             <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
                 <h3>{{item.title}}</h3>
-                <p>{{item.content}}</p>
+                <p>{{item.content_without_url|safe|linebreaksbr}}</p>
             </a>
             {% endfor %}
         </div>
