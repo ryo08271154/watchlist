@@ -95,7 +95,7 @@ def recommended_topic(request):
         #長期間見ていない場合は加点
         last_watched = WatchRecord.objects.filter(title=title,user=request.user).order_by("-watched_date").first()
         if last_watched:
-            last_watched_date = last_watched.watched_date
+            last_watched_date = last_watched.watched_date if last_watched.watched_date else datetime.date.today()
         else:
             last_watched_date = datetime.date.today()
         if last_watched_date <= datetime.date.today() - datetime.timedelta(days=365):

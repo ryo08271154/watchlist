@@ -303,8 +303,8 @@ class SearchView(LoginRequiredMixin,View):
     def get(self,request):
         titles=Title.objects.all()
         episodes=Episode.objects.all()
-        watch_records=WatchRecord.objects.filter(Q(user=request.user)|Q(user__is_public=True))
-        episode_watch_records=EpisodeWatchRecord.objects.filter(Q(user=request.user)|Q(user__is_public=True))
+        watch_records=WatchRecord.objects.filter(Q(user=request.user))
+        episode_watch_records=EpisodeWatchRecord.objects.filter(Q(user=request.user))
         my_list=MyList.objects.filter(Q(user=request.user)|Q(is_public=True))
         keywords=self.request.GET.get('q')
         search_type=self.request.GET.get("type")
@@ -364,9 +364,9 @@ class SearchView(LoginRequiredMixin,View):
                 if "title" in search_type:
                     titles=titles.filter(Q(title__icontains=keyword)|Q(title_kana__icontains=keyword)|Q(short_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(genre__name__icontains=keyword)|Q(sub_genre__name__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
                 if "record" in search_type:
-                    watch_records=watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
+                    watch_records=watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user))).distinct()
                 if "episode_record" in search_type:
-                    episode_watch_records=episode_watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
+                    episode_watch_records=episode_watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user))).distinct()
                 if "episode" in search_type:
                     episodes=episodes.filter(Q(title__title__icontains=keyword)|Q(episode_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(duration__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
                 if "mylist" in search_type:
