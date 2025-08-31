@@ -10,6 +10,7 @@ from titles.models import Title,Genre,SubGenre,Tag,Episode
 from titles.views import BaseExportView,csv_file_read,tags_add
 from django.db.models import Q,Sum
 from django.utils import timezone
+from .utils.topic import watched_date_month_topic,watched_date_year_topic,tag_topic,air_date_month_topic,air_date_year_topic,my_list_topic,today_episode_topic,recommended_topic
 
 import csv
 import io
@@ -82,55 +83,13 @@ class BaseReviewDetailView(LoginRequiredMixin,DetailView):
     context_object_name="watch_record"
     def get_queryset(self):
         return super().get_queryset().filter(Q(user=self.request.user)|Q(user__is_public=True))
-# Create your views here.
-#トップページ表示
-def watched_date_month_topic(request):
-    random_date=WatchRecord.objects.filter(user=request.user).exclude(watched_date=None).order_by("?")[0].watched_date
-    topic_name=f"{random_date.year}年{random_date.month}月視聴"
-    topic_description=f"{random_date.year}年{random_date.month}月に視聴したタイトル"
-    topic_items=Title.objects.filter(watchrecord__user=request.user,watchrecord__status="watched",watchrecord__watched_date__year=random_date.year,watchrecord__watched_date__month=random_date.month)
-    return {"name":topic_name,"description":topic_description,"items":topic_items}
-def watched_date_year_topic(request):
-    random_date=WatchRecord.objects.filter(user=request.user).exclude(watched_date=None).order_by("?")[0].watched_date
-    topic_name=f"{random_date.year}年視聴"
-    topic_description=f"{random_date.year}年に視聴したタイトルをピックアップ"
-    topic_items=Title.objects.filter(watchrecord__user=request.user,watchrecord__status="watched",watchrecord__watched_date__year=random_date.year).order_by("?")[:10]
-    return {"name":topic_name,"description":topic_description,"items":topic_items}
-def tag_topic(request):
-    random_tag=Tag.objects.order_by("?")[0]
-    topic_name=f"{random_tag.name}"
-    topic_description=f"{random_tag.description}"
-    topic_items=Title.objects.filter(tags=random_tag)
-    return {"name":topic_name,"description":topic_description,"items":topic_items}
-def air_date_month_topic(request):
-    random_date=Title.objects.exclude(air_date=None).order_by("?")[0].air_date
-    topic_name=f"{random_date.year}年{random_date.month}月放送"
-    topic_description=f"{random_date.year}年{random_date.month}月に放送されたタイトル"
-    topic_items=Title.objects.filter(air_date__year=random_date.year,air_date__month=random_date.month)
-    return {"name":topic_name,"description":topic_description,"items":topic_items}
-def air_date_year_topic(request):
-    random_date=Title.objects.exclude(air_date=None).order_by("?")[0].air_date
-    topic_name=f"{random_date.year}年放送"
-    topic_description=f"{random_date.year}年に放送されたタイトルをピックアップ"
-    topic_items=Title.objects.filter(air_date__year=random_date.year).order_by("?")[:10]
-    return {"name":topic_name,"description":topic_description,"items":topic_items}
-def my_list_topic(request):
-    random_my_list=MyList.objects.exclude(is_public=False).order_by("?")[0]
-    topic_name=f"{random_my_list.name}"
-    topic_description=f"{random_my_list.description}"
-    topic_items=MyList.objects.filter(id=random_my_list.id)[0].title.all()
-    return {"name":topic_name,"description":topic_description,"items":topic_items}
-def today_episode_topic(request):
-    topic_name="24時間以内に放送されたエピソード"
-    topic_description="本日更新のエピソードをピックアップ"
-    topic_items=Episode.objects.filter(air_date__range=[timezone.make_aware(datetime.datetime.now()-datetime.timedelta(days=1)),timezone.make_aware(datetime.datetime.now())]).order_by("air_date")
-    return {"name":topic_name,"description":topic_description,"items":topic_items}
+
 class IndexView(LoginRequiredMixin,View):
     def get(self,request):
         topics=[]
         random_topic=10 #ランダムに表示する数
         #一番上固定
-        topics.append({"name":"ランダム","description":"ランダムにタイトルをピックアップ","items":Title.objects.order_by("?")[:10]})
+        topics.append(recommended_topic(request))
         topics.append(today_episode_topic(request))
         topics.append({"name":"視聴中","description":"視聴中のタイトル","items":Title.objects.filter(watchrecord__user=request.user,watchrecord__status="watching")})
         topics.append({"name":"今月視聴","description":"今月視聴したタイトル","items":Title.objects.filter(watchrecord__user=request.user,watchrecord__status="watched",watchrecord__watched_date__year=datetime.date.today().year,watchrecord__watched_date__month=datetime.date.today().month)})
@@ -344,8 +303,8 @@ class SearchView(LoginRequiredMixin,View):
     def get(self,request):
         titles=Title.objects.all()
         episodes=Episode.objects.all()
-        watch_records=WatchRecord.objects.filter(Q(user=request.user)|Q(user__is_public=True))
-        episode_watch_records=EpisodeWatchRecord.objects.filter(Q(user=request.user)|Q(user__is_public=True))
+        watch_records=WatchRecord.objects.filter(Q(user=request.user))
+        episode_watch_records=EpisodeWatchRecord.objects.filter(Q(user=request.user))
         my_list=MyList.objects.filter(Q(user=request.user)|Q(is_public=True))
         keywords=self.request.GET.get('q')
         search_type=self.request.GET.get("type")
@@ -405,9 +364,9 @@ class SearchView(LoginRequiredMixin,View):
                 if "title" in search_type:
                     titles=titles.filter(Q(title__icontains=keyword)|Q(title_kana__icontains=keyword)|Q(short_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(genre__name__icontains=keyword)|Q(sub_genre__name__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
                 if "record" in search_type:
-                    watch_records=watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
+                    watch_records=watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user))).distinct()
                 if "episode_record" in search_type:
-                    episode_watch_records=episode_watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user)|Q(user__is_public=True))).distinct()
+                    episode_watch_records=episode_watch_records.filter((Q(comment_title__icontains=keyword)|Q(comment__icontains=keyword)|Q(watched_date__icontains=keyword)|Q(status=keyword))&(Q(user=request.user))).distinct()
                 if "episode" in search_type:
                     episodes=episodes.filter(Q(title__title__icontains=keyword)|Q(episode_title__icontains=keyword)|Q(content__icontains=keyword)|Q(air_date__icontains=keyword)|Q(duration__icontains=keyword)|Q(tags__name__icontains=keyword)).distinct()
                 if "mylist" in search_type:
