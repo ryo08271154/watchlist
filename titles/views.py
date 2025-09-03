@@ -109,10 +109,9 @@ def tags_auto_add(title):
 def csv_file_read(request_file):
     file = io.StringIO(request_file.read().decode("shift-jis"))
     return csv.reader(file)
-# 全タイトル表示
 
 
-class TitleListView(LoginRequiredMixin, ListView):
+class TitleListView(LoginRequiredMixin, ListView):  # 全タイトル表示
     model = Title
     content_object_name = "titles"
     template_name = "titles/title_list.html"
@@ -121,10 +120,9 @@ class TitleListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["titles"] = Title.objects.all()
         return context
-# タイトル詳細表示
 
 
-class TitleDetailView(LoginRequiredMixin, DetailView):
+class TitleDetailView(LoginRequiredMixin, DetailView):  # タイトル詳細表示
     model = Title
     content_object_name = "title"
     template_name = "titles/title_detail.html"
@@ -134,10 +132,9 @@ class TitleDetailView(LoginRequiredMixin, DetailView):
         context["episodes"] = Episode.objects.filter(title=self.get_object())
         context["videos"] = generate_embed_html(self.get_object().content)
         return context
-# タイトル追加
 
 
-class TitleCreateView(LoginRequiredMixin, CreateView):
+class TitleCreateView(LoginRequiredMixin, CreateView):  # タイトル追加
     model = Title
     form_class = TitleForm
     template_name = "titles/form.html"
@@ -150,10 +147,9 @@ class TitleCreateView(LoginRequiredMixin, CreateView):
         self.success_url = reverse_lazy(
             "titles:title_detail", kwargs={"pk": title.id})
         return redirect(self.success_url)
-# タイトル編集
 
 
-class TitleEditView(LoginRequiredMixin, UpdateView):
+class TitleEditView(LoginRequiredMixin, UpdateView):  # タイトル編集
     model = Title
     form_class = TitleForm
     template_name = "titles/form.html"
@@ -166,10 +162,9 @@ class TitleEditView(LoginRequiredMixin, UpdateView):
         self.success_url = reverse_lazy(
             "titles:title_detail", kwargs={"pk": title.id})
         return redirect(self.success_url)
-# タイトルをファイルからインポート
 
 
-class TitleImportView(LoginRequiredMixin, FormView):
+class TitleImportView(LoginRequiredMixin, FormView):  # タイトルをファイルからインポート
     form_class = TitleFileImportForm
     template_name = "titles/form.html"
     success_url = reverse_lazy("titles:title_list")
@@ -224,10 +219,9 @@ class TitleImportView(LoginRequiredMixin, FormView):
             related_titles_add(title)
             tags_auto_add(title)
         return redirect(self.success_url)
-# タイトルのエピソード一覧を表示
 
 
-class TitleEpisodeView(LoginRequiredMixin, ListView):
+class TitleEpisodeView(LoginRequiredMixin, ListView):  # タイトルのエピソード一覧を表示
     model = Episode
     context_object_name = "episodes"
     template_name = "titles/title_episode_list.html"
@@ -239,17 +233,15 @@ class TitleEpisodeView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = get_object_or_404(Title, id=self.kwargs["pk"])
         return context
-# エピソード詳細表示
 
 
-class EpisodeDetailView(LoginRequiredMixin, DetailView):
+class EpisodeDetailView(LoginRequiredMixin, DetailView):  # エピソード詳細表示
     model = Episode
     context_object_name = "episode"
     template_name = "titles/episode_detail.html"
-# エピソード追加
 
 
-class TitleEpisodeCreateView(LoginRequiredMixin, CreateView):
+class TitleEpisodeCreateView(LoginRequiredMixin, CreateView):  # エピソード追加
     model = Episode
     form_class = EpisodeForm
     template_name = "titles/form.html"
@@ -268,10 +260,9 @@ class TitleEpisodeCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["title"] = get_object_or_404(Title, id=self.kwargs["pk"])
         return context
-# エピソード編集
 
 
-class EpisodeEditView(LoginRequiredMixin, UpdateView):
+class EpisodeEditView(LoginRequiredMixin, UpdateView):  # エピソード編集
     model = Episode
     form_class = EpisodeForm
     context_object_name = "episode"
@@ -284,10 +275,9 @@ class EpisodeEditView(LoginRequiredMixin, UpdateView):
         self.success_url = reverse_lazy(
             "titles:episode_detail", kwargs={"pk": episode.id})
         return redirect(self.success_url)
-# エピソードをファイルからインポート
 
 
-class EpisodeImportView(LoginRequiredMixin, FormView):
+class EpisodeImportView(LoginRequiredMixin, FormView):  # エピソードをファイルからインポート
     form_class = EpisodeFileImportForm
     template_name = "titles/form.html"
 
@@ -349,10 +339,9 @@ def syoboi_calender_title_get(tid):
     if result is None:
         return []
     return list(result.values())
-# 外部サイトからタイトルを取得して追加する
 
 
-class TitleSourceImportView(LoginRequiredMixin, FormView):
+class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトからタイトルを取得して追加する
     form_class = SourceSearchForm
     template_name = "titles/search_form.html"
     success_url = reverse_lazy("titles:title_list")
@@ -479,9 +468,9 @@ def syoboi_calender_episode_get(title, selected_titles_id, title_episodes):
         else:
             break
     return episodes, update_episodes
+
+
 # 外部サイトからエピソードを取得して追加する
-
-
 class TitleEpisodeSourceImportView(LoginRequiredMixin, FormView):
     form_class = SourceSearchForm
     template_name = "titles/search_form.html"
