@@ -23,6 +23,8 @@ urlpatterns = [
     path("mylist/new", views.MyListCreateView.as_view(), name="mylist_create"),
     path("mylist/<uuid:pk>/edit", views.MyListEditView.as_view(), name="mylist_edit"),
     path("mylist/<uuid:pk>", views.MyListDetailView.as_view(), name="mylist_detail"),
+    path("title/<uuid:pk>/add_mylist", views.MyListAddTitleView.as_view(),
+         name="add_mylist"),
 
 
     path("tags/", views.TagView.as_view(), name="tag_list"),

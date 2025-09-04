@@ -22,6 +22,7 @@
     <p>{{title.content_without_url|safe|linebreaksbr}}</p>
     {%if title.source_website%}<p>データ取得元：{{title.source_website}}</p>{%endif%}
     <ul>
+        <li><a href="{%url 'records:add_mylist' title.id %}">マイリストに追加</a></li>
         <li><a href="{% url 'records:title_review_list' title.id %}">レビュー</a></li>
     </ul>
     <div class="title-section">

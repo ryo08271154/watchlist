@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import WatchRecord, EpisodeWatchRecord, MyList, WatchMethod
-from .forms import ReviewForm, EpisodeReviewForm, MyListForm, ReviewFileImportForm, ExportForm
+from .forms import ReviewForm, EpisodeReviewForm, MyListForm, ReviewFileImportForm, ExportForm, MyListAddTitleForm
 from titles.models import Title, Genre, SubGenre, Tag, Episode
 from titles.views import BaseExportView, csv_file_read, tags_add
 from django.db.models import Q, Sum
@@ -311,6 +311,30 @@ class MyListEditView(LoginRequiredMixin, UpdateView):  # マイリストを編�
         tags_add(mylist, "description")
         messages.success(self.request, "リストを編集しました")
         return redirect(self.success_url)
+
+
+class MyListAddTitleView(LoginRequiredMixin, FormView):  # マイリストにタイトルを追加
+    form_class = MyListAddTitleForm
+    template_name = "records/form.html"
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        user_mylists = MyList.objects.filter(
+            user=self.request.user).exclude(titles__in=[self.kwargs["pk"]])
+        form.fields["mylists"].choices = [
+            (mylist.id, mylist.name) for mylist in user_mylists]
+        return form
+
+    def form_valid(self, form):
+        add_mylists = form.cleaned_data["mylists"]
+        for mylist in add_mylists:
+            mylist = MyList.objects.get(id=mylist)
+            mylist.titles.add(Title.objects.get(id=self.kwargs["pk"]))
+        messages.success(
+            self.request, f"{len(add_mylists)}件のマイリストに追加しました")
+        self.success_url = reverse_lazy("titles:title_detail", kwargs={
+                                        "pk": self.kwargs["pk"]})
+        return super().form_valid(form)
 
 
 class TagView(LoginRequiredMixin, ListView):  # タグ一覧表示

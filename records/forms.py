@@ -23,6 +23,18 @@ class MyListForm(ModelForm):
     class Meta:
         model = MyList
         fields = ["name", "description", "titles", "tags", "is_public"]
+        widgets = {"titles": forms.CheckboxSelectMultiple()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get("instance")
+        if instance:
+            self.fields["titles"].queryset = instance.titles.all()
+
+
+class MyListAddTitleForm(forms.Form):
+    mylists = forms.MultipleChoiceField(
+        label="追加するマイリストを選択", widget=forms.CheckboxSelectMultiple, choices=[])
 
 
 class ReviewFileImportForm(forms.Form):
