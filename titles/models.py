@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 import re
+from urllib.parse import urlparse
 
 
 class Genre(models.Model):
@@ -72,6 +73,12 @@ class Title(models.Model):
     def content_without_url(self):
         text = re.sub(r'https?://[\w/:%#$&?()~.=+-]+', '', self.content)
         return ' '.join(text.split())
+
+    @property
+    def urls_in_content(self):
+        urls = re.findall(
+            r"https?://(?![\w.-]*(?:youtube\.com|youtu\.be|nicovideo\.jp|ch\.nicovideo\.jp))[\w/:%#$&?()~.=+-]+", self.content)
+        return [{"url": url, "parsed": urlparse(url)} for url in urls]
 
     class Meta:
         verbose_name = "タイトル"
