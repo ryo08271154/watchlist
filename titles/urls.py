@@ -31,5 +31,8 @@ urlpatterns = [path("titles/", views.TitleListView.as_view(), name="title_list")
                path("export/titles", views.TitleExportView.as_view(),
                     name="title_export"),
                path("export/episodes", views.EpisodeExportView.as_view(),
-                    name="episode_export")
+                    name="episode_export"),
+
+               path("extension", views.ExtensionInfoView.as_view(),
+                    name="extension"),
                ]

@@ -1,0 +1,136 @@
+{% extends 'base.html' %} {% block title %}拡張機能{% endblock %}
+{% block head %}
+<style>
+  .extension-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .extension-section {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .extension-section h2 {
+    color: #1976d2;
+    margin-bottom: 15px;
+  }
+
+  .download-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #1976d2;
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px 0;
+    font-weight: bold;
+  }
+
+  .download-button:hover {
+    background-color: #1565c0;
+    color: white;
+  }
+
+  .step-list {
+    list-style-type: decimal;
+    padding-left: 20px;
+  }
+
+  .step-list li {
+    margin-bottom: 10px;
+  }
+
+  .feature-list {
+    list-style-type: disc;
+    padding-left: 20px;
+  }
+
+  .feature-list li {
+    margin-bottom: 8px;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="extension-container">
+  <div class="extension-section">
+    <h2>視聴記録拡張機能について</h2>
+    <p>
+      この拡張機能を使用することで、動画配信サービスから簡単に作品やエピソードのレビューを記録できます。
+    </p>
+    {% if download_url %}
+    <a
+      href="{{ download_url }}"
+      class="download-button"
+      >Chrome拡張機能をダウンロード</a>
+    {% else %}
+    <a class="download-button">拡張機能は現在利用できません。</a>
+    {% endif %}
+  </div>
+
+  <div class="extension-section">
+    <h2>インストール手順</h2>
+    <ol class="step-list">
+      <li>上記のリンクから最新リリースをダウンロードし、解凍します</li>
+      <li>
+        Chrome拡張機能の管理ページ(<code>chrome://extensions/</code>)を開きます
+      </li>
+      <li>右上の「デベロッパーモード」を有効にします</li>
+      <li>
+        「パッケージ化されていない拡張機能を読み込む」をクリックし、解凍したディレクトリを選択します
+      </li>
+      <li>拡張機能の設定から視聴記録のURLを {{ request.scheme }}://{{ request.get_host }} にします</li>
+    </ol>
+  </div>
+
+  <div class="extension-section">
+    <h2>使い方</h2>
+    <h3>作品・エピソードの確認</h3>
+    <ol class="step-list">
+      <li>
+        動画配信サービスで作品を開くと、自動的に視聴記録から作品とエピソードを検索します
+      </li>
+      <li>
+        拡張機能のアイコンをクリックすると、検出した作品とエピソードの情報が表示されます
+      </li>
+      <li>作品名やエピソード名をクリックすると、該当ページが開きます</li>
+    </ol>
+    <h3>レビューの記録</h3>
+    <h4>フローティングボタンから記録する方法</h4>
+    <ol class="step-list">
+      <li>
+        拡張機能の設定で「エピソードのレビューボタンを表示する」を有効にします
+      </li>
+      <li>
+        動画再生ページで動画を一時停止または再生終了すると、レビューボタンが表示されます
+      </li>
+      <li>ボタンをクリックすると、エピソードのレビューページが開きます</li>
+      <li>右クリックで、エピソードの詳細ページを開けます</li>
+    </ol>
+  </div>
+
+  <div class="extension-section">
+    <h2>主な機能</h2>
+    <ul class="feature-list">
+      <li>視聴中の作品を視聴記録から自動検索</li>
+      <li>エピソードの自動検出</li>
+      <li>ポップアップから作品・エピソードページにアクセス</li>
+      <li>動画配信サイトからワンクリックでレビューを記録</li>
+      <li>キーワードから視聴記録を検索</li>
+    </ul>
+  </div>
+
+  <div class="extension-section">
+    <h2>注意</h2>
+    <ul class="feature-list">
+      <li>
+        動画配信サイトの仕様変更により、正常に動作しなくなる可能性があります。
+      </li>
+      <li>拡張機能はベータ版であり、予期せぬ動作をする可能性があります。</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
