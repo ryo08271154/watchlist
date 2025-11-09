@@ -1,0 +1,17 @@
+<div class="title-section" id="{{ id }}">
+    <h2><a href="{{ section_url }}">{{ section_name }}</a></h2>
+    <div class="title-container">
+        {% if items %}
+            {% for item in items %}
+                <a href="{{ item.url }}" class="title-item">
+                    <h3>{{ item.main_title }}</h3>
+                    <p>{{ item.content|safe|linebreaksbr }}</p>
+                </a>
+            {% endfor %}
+        {% else %}
+            <h3>
+                {% if empty_message %}{{ empty_message }}{% else %}現在表示できるデータがありません。データが追加されるとここに表示されます。{% endif %}
+            </h3>
+        {% endif %}
+    </div>
+</div>
