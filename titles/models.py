@@ -109,4 +109,4 @@ class Episode(models.Model):
         verbose_name_plural = "エピソード"
 
     def __str__(self):
-        return self.title.title
+        return f"{self.title.title} - {self.episode_title or self.episode_number}"
