@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
-{%block title%}マイレビュー{%endblock%}
+
+{% block title %}マイレビュー{% endblock %}
 {% block head %}
     <style>
         .title-container {
@@ -12,31 +13,95 @@
             min-height: 100px;
         }
     </style>
-{%endblock%}
-{%block content%}
-    <h1>{%if user.nickname%}{{user.nickname}}さん{%else%}あなた{%endif%}の{%if year%}{{year}}年{%else%}過去1年{%endif%}の記録</h1>
-    <div class="search-form">
-        <form action="{%url 'records:myreview'%}" autocomplete="off" method="get">
-        <label for="year">年</label>
-        <input type="number" min="{{min_year}}" max="{{max_year}}" value="{{request.GET.year}}" id="year" name="year" placeholder="年で検索">
+{% endblock %}
+{% block content %}
+    <h1>{% if user.nickname %}{{ user.nickname }}さん{% else %}あなた{% endif %}の{% if year %}{{ year }}年{% else %}過去1年{% endif %}の記録</h1>
+    <div class="tabs">
+        <button class="tab-button active" data-target="tab-titles">タイトル</button>
+        <button class="tab-button" data-target="tab-episodes">エピソード</button>
     </div>
-    {%for month in months%}
+    <div class="search-form">
+        <form action="{% url 'records:myreview' %}" autocomplete="off" method="get">
+            <label for="year">年</label>
+            <input
+                type="number"
+                min="{{ min_year }}"
+                max="{{ max_year }}"
+                value="{{ request.GET.year }}"
+                id="year"
+                name="year"
+                placeholder="年で検索"
+            />
+            <button type="submit">検索</button>
+        </form>
+    </div>
+    {% for month in months %}
         <div class="title-section">
-            <h2><a href="{% url 'records:search'%}?watched_date={{month|date:'Y-m'}}">{{month.year}}年{{month.month}}月</a></h2>
+            <h2><a href="{% url 'records:search' %}?watched_date={{ month|date:'Y-m' }}">{{ month.year }}年{{ month.month }}月</a></h2>
             <div class="title-container">
-            {%if watch_records%}
-                {%for item in watch_records%}
-                {%if item.watched_date.year == month.year and item.watched_date.month == month.month%}
-                <a href="{% url 'records:review_detail' item.id %}" class="title-item">
-                    <h3>{{item.comment_title}}</h3>
-                    <p>{{item.title}}</p>
-                </a>
-                {%endif%}
-                {% endfor %}
-            {%else%}
-                <h3>見つかりませんでした</h3>
-            {%endif%}
+                {% if watch_records %}
+                    {% for item in watch_records %}
+                        {% if item.watched_date.year == month.year and item.watched_date.month == month.month %}
+                            <a
+                                href="{% if request.GET.type == 'record' %}{% url 'records:review_detail' item.id %}{% else %}{% url 'records:episode_review_detail' item.id %}{% endif %}"
+                                class="title-item"
+                            >
+                                <h3>{{ item.comment_title }}</h3>
+                                <p>{{ item.watched_date }}</p>
+                                {% if request.GET.type == "record" %}
+                                    <p>{{ item.title }}</p>
+                                {% else %}
+                                    <p>{{ item.episode.title.title }} エピソード{{ item.episode.episode_number }}</p>
+                                {% endif %}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <h3>見つかりませんでした</h3>
+                {% endif %}
             </div>
         </div>
-    {%endfor%}
-{%endblock%}
+    {% endfor %}
+    <div class="tab-content active" id="tab-titles"></div>
+    <div class="tab-content" id="tab-episodes"></div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const buttons = document.querySelectorAll(".tab-button");
+            const searchForm = document.querySelector(".search-form");
+            const url = new URL(location.href);
+            const titleButton = buttons[0];
+            const episodeButton = buttons[1];
+            const type = url.searchParams.get("type");
+            if (type === "record") {
+                titleButton.click();
+            } else if (type === "episode_record") {
+                episodeButton.click();
+            }
+            buttons.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    console.log("OK");
+                    const target = this.getAttribute("data-target");
+                    if (target === "tab-titles") {
+                        url.searchParams.set("type", "record");
+                    } else if (target === "tab-episodes") {
+                        url.searchParams.set("type", "episode_record");
+                    }
+                    location.href = url;
+                });
+            });
+            searchForm.addEventListener("submit", event => {
+                event.preventDefault();
+                const yearInput = document.getElementById("year");
+                if (yearInput.value) {
+                    url.searchParams.set("year", yearInput.value);
+                    url.searchParams.set("type", type);
+                } else {
+                    url.searchParams.delete("year");
+                }
+                location.href = url;
+            });
+        });
+    </script>
+{% endblock %}

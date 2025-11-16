@@ -658,6 +658,13 @@ class MyReviewListView(LoginRequiredMixin, ListView):
     ordering = "-watched_date"
     context_object_name = "watch_records"
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.GET.get("type") == "title_record":
+            self.model = WatchRecord
+        elif request.GET.get("type") == "episode_record":
+            self.model = EpisodeWatchRecord
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         if self.request.GET.get("year"):
             return super().get_queryset().filter(user=self.request.user, watched_date__year=self.request.GET.get("year"))
@@ -668,7 +675,7 @@ class MyReviewListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["min_year"] = WatchRecord.objects.filter(user=self.request.user).exclude(
+        context["min_year"] = self.model.objects.filter(user=self.request.user).exclude(
             watched_date=None).order_by("watched_date").values_list("watched_date__year", flat=True).first()  # 最小年を取得
         context["max_year"] = datetime.date.today().year
         if self.request.GET.get("year"):
