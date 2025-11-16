@@ -1,370 +1,409 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-  <head>
-    <style>
-      a {
-        color: black;
-        text-decoration: none;
-        border-radius: 8px;
-        transition: background 0.2s;
-      }
+    <head>
+        <style>
+            a {
+                color: black;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: background 0.2s;
+            }
 
-      a:hover,
-      a:focus {
-        background: #e3f2fd;
-        color: #1565c0;
-      }
+            a:hover,
+            a:focus {
+                background: #e3f2fd;
+                color: #1565c0;
+            }
 
-      body {
-        font-family: sans-serif;
-        background-color: #fafbfc;
-        margin: 0;
-        padding: 0;
-        padding-top: 200px;
-      }
+            body {
+                font-family: sans-serif;
+                background-color: #fafbfc;
+                margin: 0;
+                padding: 0;
+                padding-top: 200px;
+            }
 
-      header {
-        min-height: 150px;
-        max-height: 200px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background-color: #fafbfc;
-        opacity: 0.9;
-      }
-      .title-section h2 {
-        background-color: #e8e8e8;
-        display: inline;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-      }
+            header {
+                min-height: 150px;
+                max-height: 200px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background-color: #fafbfc;
+                opacity: 0.9;
+            }
+            .title-section h2 {
+                background-color: #e8e8e8;
+                display: inline;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+            }
 
-      .title-section p {
-        background-color: #f5f5f5;
-        display: inline;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        margin: 0;
-        font-size: smaller;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: gray;
-      }
+            .title-section p {
+                background-color: #f5f5f5;
+                display: inline;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                margin: 0;
+                font-size: smaller;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: gray;
+            }
 
-      .title-item {
-        min-width: 150px;
-        max-width: 150px;
-        min-height: 100px;
-        flex-shrink: 0;
-        background-color: white;
-        padding: 16px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-      }
+            .title-item {
+                min-width: 150px;
+                max-width: 150px;
+                min-height: 100px;
+                flex-shrink: 0;
+                background-color: white;
+                padding: 16px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            }
 
-      .title-item h3 {
-        margin: 0 0 10px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-      }
+            .title-item h3 {
+                margin: 0 0 10px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
 
-      .title-item p {
-        background-color: transparent;
-        display: block;
-        border: none;
-        border-radius: 8px;
-        color: black;
-        margin: 0;
-        font-size: smaller;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+            .title-item p {
+                background-color: transparent;
+                display: block;
+                border: none;
+                border-radius: 8px;
+                color: black;
+                margin: 0;
+                font-size: smaller;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-      .episode-item {
-        min-width: 150px;
-        min-height: 100px;
-        flex-shrink: 0;
-        background-color: #e0f2f7;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+            .episode-item {
+                min-width: 150px;
+                min-height: 100px;
+                flex-shrink: 0;
+                background-color: #e0f2f7;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-      .episode-item h3 {
-        color: #1565c0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-      }
+            .episode-item h3 {
+                color: #1565c0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
 
-      .episode-item p {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-      }
+            .episode-item p {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
 
-      /* メッセージ表示 */
-      .messages {
-        list-style: none;
-        padding: 0.5em 1em;
-        margin: 1em 0;
-        border-radius: 8px;
-        background: #fffbe7;
-        border: 1px solid #ffe082;
-        box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.04);
-      }
+            /* メッセージ表示 */
+            .messages {
+                list-style: none;
+                padding: 0.5em 1em;
+                margin: 1em 0;
+                border-radius: 8px;
+                background: #fffbe7;
+                border: 1px solid #ffe082;
+                box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.04);
+            }
 
-      .messages li {
-        margin: 0.2em 0;
-        font-size: 1em;
-      }
+            .messages li {
+                margin: 0.2em 0;
+                font-size: 1em;
+            }
 
-      .messages .error,
-      .messages .danger {
-        color: #b71c1c;
-        background: #ffebee;
-        border-left: 4px solid #e53935;
-        padding-left: 0.5em;
-      }
+            .messages .error,
+            .messages .danger {
+                color: #b71c1c;
+                background: #ffebee;
+                border-left: 4px solid #e53935;
+                padding-left: 0.5em;
+            }
 
-      .messages .success {
-        color: #1b5e20;
-        background: #e8f5e9;
-        border-left: 4px solid #43a047;
-        padding-left: 0.5em;
-      }
+            .messages .success {
+                color: #1b5e20;
+                background: #e8f5e9;
+                border-left: 4px solid #43a047;
+                padding-left: 0.5em;
+            }
 
-      .messages .warning {
-        color: #f57f17;
-        background: #fff3e0;
-        border-left: 4px solid #ff9800;
-        padding-left: 0.5em;
-      }
+            .messages .warning {
+                color: #f57f17;
+                background: #fff3e0;
+                border-left: 4px solid #ff9800;
+                padding-left: 0.5em;
+            }
 
-      /* ナビゲーションリスト */
-      .nav-list ul {
-        list-style: none;
-        padding: 0;
-        margin: 1em 0;
-        display: flex;
-        gap: 1em;
-      }
+            /* ナビゲーションリスト */
+            .nav-list ul {
+                list-style: none;
+                padding: 0;
+                margin: 1em 0;
+                display: flex;
+                gap: 1em;
+            }
 
-      ul li {
-        margin: 0;
-      }
+            ul li {
+                margin: 0;
+            }
 
-      ul li a {
-        display: inline-block;
-        padding: 0.5em 1em;
-      }
+            ul li a {
+                display: inline-block;
+                padding: 0.5em 1em;
+            }
 
-      /* 検索フォーム・ログアウトフォーム */
-      .top-bar form {
-        margin: 0.5em 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-        margin: 0;
-        flex-shrink: 1;
-      }
+            /* 検索フォーム・ログアウトフォーム */
+            .top-bar form {
+                margin: 0.5em 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5em;
+                margin: 0;
+                flex-shrink: 1;
+            }
 
-      input[type="search"] {
-        padding: 0.4em 0.8em;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 1em;
-        background: #fff;
-        transition: border 0.2s;
-      }
+            input[type="search"] {
+                padding: 0.4em 0.8em;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                font-size: 1em;
+                background: #fff;
+                transition: border 0.2s;
+            }
 
-      input[type="search"]:focus {
-        border: 1.5px solid #1976d2;
-        outline: none;
-      }
+            input[type="search"]:focus {
+                border: 1.5px solid #1976d2;
+                outline: none;
+            }
 
-      button {
-        padding: 0.4em 1em;
-        border: none;
-        border-radius: 8px;
-        background: #1976d2;
-        color: #fff;
-        font-size: 1em;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
+            button {
+                padding: 0.4em 1em;
+                border: none;
+                border-radius: 8px;
+                background: #1976d2;
+                color: #fff;
+                font-size: 1em;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
 
-      button:hover,
-      button:focus {
-        background: #1565c0;
-      }
+            button:hover,
+            button:focus {
+                background: #1565c0;
+            }
 
-      .logout {
-        margin-right: 0.5em;
-        font-weight: bold;
-      }
+            .logout {
+                margin-right: 0.5em;
+                font-weight: bold;
+            }
 
-      /* h1 タイトル */
-      h1 {
-        margin: 0.5em 0 0.5em 0.2em;
-        font-size: 2em;
-        letter-spacing: 0.05em;
-      }
+            /* h1 タイトル */
+            h1 {
+                margin: 0.5em 0 0.5em 0.2em;
+                font-size: 2em;
+                letter-spacing: 0.05em;
+            }
 
-      h1 a {
-        color: #1976d2;
-        text-shadow: 1px 1px 0 #e3f2fd;
-      }
+            h1 a {
+                color: #1976d2;
+                text-shadow: 1px 1px 0 #e3f2fd;
+            }
 
-      .top-bar {
-        display: flex;
-        align-items: center;
-        gap: 1.5em;
-        margin-bottom: 0.5em;
-      }
+            .top-bar {
+                display: flex;
+                align-items: center;
+                gap: 1.5em;
+                margin-bottom: 0.5em;
+            }
 
-      .nav-list {
-        margin: 0;
-        gap: 0.5em;
-      }
+            .nav-list {
+                margin: 0;
+                gap: 0.5em;
+            }
+            .title-container {
+                display: flex;
+                overflow-x: auto;
+                gap: 16px;
+                padding: 10px;
+                background-color: #f5f5f5;
+                border: 1px solid #ccc;
+                scroll-behavior: smooth;
+                min-height: 100px;
+            }
+            .tab-button {
+                padding: 8px 16px;
+                border: none;
+                background-color: #f0f0f0;
+                color: #333;
+                cursor: pointer;
+                transition:
+                    background-color 0.2s,
+                    color 0.2s;
+            }
 
-      /* レスポンシブ対応 */
-      @media (max-width: 600px) {
-        ul {
-          gap: 0.5em;
-        }
+            .tab-button:hover {
+                background-color: #e0e0e0;
+            }
 
-        .top-bar {
-          flex-direction: column;
-          gap: 0.5em;
-        }
+            .tab-button.active {
+                background-color: #1976d2; /* 青色 */
+                color: #fff; /* 文字色を白に */
+            }
 
-        .nav-list ul {
-          flex-wrap: wrap;
-          /* 折り返し許可 */
-          gap: 0.2em;
-        }
+            .tab-content {
+                display: none;
+            }
 
-        .nav-list ul li a {
-          padding: 0.3em 0.6em;
-          /* パディングを小さく */
-          font-size: 0.9em;
-          /* フォントサイズを小さく */
-        }
+            .tab-content.active {
+                display: block;
+            }
+            /* レスポンシブ対応 */
+            @media (max-width: 600px) {
+                ul {
+                    gap: 0.5em;
+                }
 
-        .logout {
-          display: none;
-        }
+                .top-bar {
+                    flex-direction: column;
+                    gap: 0.5em;
+                }
 
-        button[id="logout"] {
-          display: none;
-        }
-      }
-    </style>
-    {% block head %}{% endblock%}
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% load static %}
-    <link rel="icon" href="{% static 'favicon.ico' %}" />
-    <title>視聴記録 {% block title %}{% endblock %}</title>
-  </head>
+                .nav-list ul {
+                    flex-wrap: wrap;
+                    /* 折り返し許可 */
+                    gap: 0.2em;
+                }
 
-  <body>
-    <header>
-      <h1><a href="{%url 'records:index'%}">視聴記録</a></h1>
-      {% if messages %}
-      <ul class="messages">
-        {% for message in messages %}
-        <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>
-          {{ message }}
-        </li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-      <div class="top-bar">
-        <form action="{%url 'records:search'%}" autocomplete="off" method="get">
-          <label for="title">検索</label>
-          <input
-            type="search"
-            id="title"
-            name="q"
-            placeholder="検索語句を入力"
-          />
-          <button type="submit">検索</button>
-        </form>
-        <nav class="nav-list">
-          <ul>
-            <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
-            <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
-            <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
-            <li><a href="#" id="openMenu">メニュー</a></li>
-          </ul>
-        </nav>
-        <form
-          action="{% url 'accounts:logout' %}"
-          method="post"
-          style="margin: 0 0 0 auto"
-        >
-          {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
-            {%if user.nickname%}{{user.nickname}}{%else%}ユーザー{%endif%}</a
-          ><button type="submit" id="logout">ログアウト</button>
-        </form>
-      </div>
-      <dialog id="menu">
-        <ul>
-          <li><a href="{% url 'records:mylist' %}">マイリスト</a></li>
-          <li>
-            <a href="{% url 'titles:watch_schedule' %}">視聴スケジュール</a>
-          </li>
-          <li>
-            <a href="https://github.com/ryo08271154/watchlist" target="_blank"
-              >ソースコード</a
-            >
-          </li>
-          <li><a href="{% url 'titles:extension' %}">拡張機能</a></li>
-        </ul>
-        <button id="closeMenu">閉じる</button>
-      </dialog>
-    </header>
-    {% block content %} {% endblock %}
-    <script>
-      const openMenu = document.getElementById("openMenu");
-      const menu = document.getElementById("menu");
-      const closeMenu = document.getElementById("closeMenu");
-      openMenu.addEventListener("click", (event) => {
-        event.preventDefault();
-        menu.showModal();
-        closeMenu.focus();
-      });
-      closeMenu.addEventListener("click", () => {
-        menu.close();
-      });
-      menu.addEventListener("click", (event) => {
-        const rect = menu.getBoundingClientRect();
-        const inDialog =
-          rect.top <= event.clientY &&
-          event.clientY <= rect.bottom &&
-          rect.left <= event.clientX &&
-          event.clientX <= rect.right;
+                .nav-list ul li a {
+                    padding: 0.3em 0.6em;
+                    /* パディングを小さく */
+                    font-size: 0.9em;
+                    /* フォントサイズを小さく */
+                }
 
-        if (!inDialog) {
-          menu.close();
-        }
-      });
-    </script>
-  </body>
+                .logout {
+                    display: none;
+                }
+
+                button[id="logout"] {
+                    display: none;
+                }
+            }
+        </style>
+        {% block head %}{% endblock %}
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {% load static %}
+        <link rel="icon" href="{% static 'favicon.ico' %}" />
+        <title>視聴記録 {% block title %}{% endblock %}</title>
+    </head>
+
+    <body>
+        <header>
+            <h1><a href="{% url 'records:index' %}">視聴記録</a></h1>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="top-bar">
+                <form action="{% url 'records:search' %}" autocomplete="off" method="get">
+                    <label for="title">検索</label>
+                    <input type="search" id="title" name="q" placeholder="検索語句を入力" />
+                    <button type="submit">検索</button>
+                </form>
+                <nav class="nav-list">
+                    <ul>
+                        <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
+                        <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
+                        <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
+                        <li><a href="#" id="openMenu">メニュー</a></li>
+                    </ul>
+                </nav>
+                <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
+                    {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
+                        {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
+                    ><button type="submit" id="logout">ログアウト</button>
+                </form>
+            </div>
+            <dialog id="menu">
+                <ul>
+                    <li><a href="{% url 'records:mylist' %}">マイリスト</a></li>
+                    <li>
+                        <a href="{% url 'titles:watch_schedule' %}">視聴スケジュール</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/ryo08271154/watchlist" target="_blank">ソースコード</a>
+                    </li>
+                    <li><a href="{% url 'titles:extension' %}">拡張機能</a></li>
+                </ul>
+                <button id="closeMenu">閉じる</button>
+            </dialog>
+        </header>
+        {% block content %}{% endblock %}
+        <script>
+            const openMenu = document.getElementById("openMenu");
+            const menu = document.getElementById("menu");
+            const closeMenu = document.getElementById("closeMenu");
+            openMenu.addEventListener("click", event => {
+                event.preventDefault();
+                menu.showModal();
+                closeMenu.focus();
+            });
+            closeMenu.addEventListener("click", () => {
+                menu.close();
+            });
+            menu.addEventListener("click", event => {
+                const rect = menu.getBoundingClientRect();
+                const inDialog =
+                    rect.top <= event.clientY && event.clientY <= rect.bottom && rect.left <= event.clientX && event.clientX <= rect.right;
+
+                if (!inDialog) {
+                    menu.close();
+                }
+            });
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const buttons = document.querySelectorAll(".tab-button");
+                const contents = document.querySelectorAll(".tab-content");
+
+                buttons.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        // ボタンのactive切り替え
+                        buttons.forEach(b => b.classList.remove("active"));
+                        btn.classList.add("active");
+
+                        // 対応するコンテンツ表示
+                        contents.forEach(c => c.classList.remove("active"));
+                        document.getElementById(btn.dataset.target).classList.add("active");
+                    });
+                });
+            });
+        </script>
+        {% block scripts %}{% endblock %}
+    </body>
 </html>

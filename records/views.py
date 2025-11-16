@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView, TemplateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import WatchRecord, EpisodeWatchRecord, MyList, WatchMethod
@@ -494,19 +494,162 @@ class SearchView(LoginRequiredMixin, View):
 
 class MypageView(LoginRequiredMixin, View):
     def get(self, request):
-        watched_titles = WatchRecord.objects.filter(status="watched", user=request.user).order_by(
-            "watched_date").order_by("-updated_at")[:10]
-        watching_titles = WatchRecord.objects.filter(
-            status="watching", user=request.user).order_by("-updated_at")[:10]
-        not_watched_titles = WatchRecord.objects.filter(
-            status="not_watched", user=request.user).order_by("-updated_at")[:10]
-        dropped_titles = WatchRecord.objects.filter(
-            status="dropped", user=request.user).order_by("-updated_at")
-        none_watched_titles = WatchRecord.objects.filter(
-            status="", user=request.user).order_by("-updated_at")[:10]
-        my_lists = MyList.objects.filter(
-            user=request.user).order_by("-updated_at")[:10]
-        return render(request, "records/mypage.html", {"watched_titles": watched_titles, "watching_titles": watching_titles, "not_watched_titles": not_watched_titles, "dropped_titles": dropped_titles, "none_watched_titles": none_watched_titles, "my_lists": my_lists})
+        title_sections = [
+            {
+                "id": "watching_titles",
+                "section_name": "視聴中",
+                "section_url": reverse("records:search") + "?status=watching&type=record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.title.title}"
+                    }
+                    for item in WatchRecord.objects.filter(status="watching", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "watched_titles",
+                "section_name": "視聴済み",
+                "section_url": reverse("records:search") + "?status=watched&type=record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.title.title}"
+                    }
+                    for item in WatchRecord.objects.filter(status="watched", user=request.user).order_by("watched_date").order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "not_watched_titles",
+                "section_name": "未視聴",
+                "section_url": reverse("records:search") + "?status=not_watched&type=record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.title.title}"
+                    }
+                    for item in WatchRecord.objects.filter(status="not_watched", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "dropped_titles",
+                "section_name": "視聴中断",
+                "section_url": reverse("records:search") + "?status=dropped&type=record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.title.title}"
+                    }
+                    for item in WatchRecord.objects.filter(status="dropped", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "none_watched_titles",
+                "section_name": "視聴状況不明",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.title.title}"
+                    }
+                    for item in WatchRecord.objects.filter(status="", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "section_name": "マイリスト",
+                "section_url": reverse("records:mylist"),
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:mylist_detail", args=[item.id]),
+                        "main_title": item.name,
+                        "content": item.description
+                    }
+                    for item in MyList.objects.filter(user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+        ]
+        episode_sections = [
+            {
+                "id": "watching_episodes",
+                "section_name": "視聴中",
+                "section_url": reverse("records:search") + "?status=watching&type=episode_record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:episode_review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.episode.title.title} エピソード{item.episode.episode_number}"
+                    }
+                    for item in EpisodeWatchRecord.objects.filter(status="watching", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "watched_episodes",
+                "section_name": "視聴済み",
+                "section_url": reverse("records:search") + "?status=watched&type=episode_record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:episode_review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.episode.title.title} エピソード{item.episode.episode_number}"
+                    }
+                    for item in EpisodeWatchRecord.objects.filter(status="watched", user=request.user).order_by("watched_date").order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "not_watched_episodes",
+                "section_name": "未視聴",
+                "section_url": reverse("records:search") + "?status=not_watched&type=episode_record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:episode_review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.episode.title.title} エピソード{item.episode.episode_number}"
+                    }
+                    for item in EpisodeWatchRecord.objects.filter(status="not_watched", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "dropped_episodes",
+                "section_name": "視聴中断",
+                "section_url": reverse("records:search") + "?status=dropped&type=episode_record",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:episode_review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.episode.title.title} エピソード{item.episode.episode_number}"
+                    }
+                    for item in EpisodeWatchRecord.objects.filter(status="dropped", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+            {
+                "id": "none_watched_episodes",
+                "section_name": "視聴状況不明",
+                "empty_message": "まだ何も登録されていません",
+                "items": [
+                    {
+                        "url": reverse("records:episode_review_detail", args=[item.id]),
+                        "main_title": item.comment_title,
+                        "content": f"{item.watched_date}\n{item.episode.title.title} エピソード{item.episode.episode_number}"
+                    }
+                    for item in EpisodeWatchRecord.objects.filter(status="", user=request.user).order_by("-updated_at")[:10]
+                ]
+            },
+        ]
+        return render(request, "records/mypage.html", {"title_sections": title_sections, "episode_sections": episode_sections})
 
 
 class MyReviewListView(LoginRequiredMixin, ListView):
@@ -514,6 +657,13 @@ class MyReviewListView(LoginRequiredMixin, ListView):
     model = WatchRecord
     ordering = "-watched_date"
     context_object_name = "watch_records"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.GET.get("type") == "title_record":
+            self.model = WatchRecord
+        elif request.GET.get("type") == "episode_record":
+            self.model = EpisodeWatchRecord
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         if self.request.GET.get("year"):
@@ -525,7 +675,7 @@ class MyReviewListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["min_year"] = WatchRecord.objects.filter(user=self.request.user).exclude(
+        context["min_year"] = self.model.objects.filter(user=self.request.user).exclude(
             watched_date=None).order_by("watched_date").values_list("watched_date__year", flat=True).first()  # 最小年を取得
         context["max_year"] = datetime.date.today().year
         if self.request.GET.get("year"):

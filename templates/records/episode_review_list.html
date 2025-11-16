@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{%block title%}{{episode.title.title}}｜レビュー{%endblock%}
+{% block title %}{{ episode.title.title }}｜レビュー{% endblock %}
 {% block head %}
     <style>
         .title-container {
@@ -11,26 +11,35 @@
             border: 1px solid #ccc;
         }
     </style>
-{%endblock%}
-{%block content%}
+{% endblock %}
+{% block content %}
     <ul>
-        <li><a href="{% url 'records:episode_review_create' episode.pk%}">レビュー追加</a></li>
+        <li><a href="{% url 'records:episode_review_create' episode.pk %}">レビュー追加</a></li>
     </ul>
     <div class="title-section">
         <h2>レビュー</h2>
-        <p>{{watch_records.count}}件</p>
+        <p>{{ watch_records.count }}件</p>
         <div class="title-container">
-        {%if watch_records%}
-            {% for item in watch_records%}
-            <a href="{% url 'records:episode_review_detail' item.id %}" class="title-item">
-                <h3>{{item.comment_title}}</h3>
-                <p>{{item.title}}</p>
-            </a>
-            {% endfor %}
-        {%else%}
-            <h3>現在表示できるデータがありません。データが追加されるとここに表示されます。</h3>
-            <ul><li><a href="{% url 'records:episode_review_create' episode.pk %}">レビュー追加</a></li></ul>
-        {%endif%}
+            {% if watch_records %}
+                {% for item in watch_records %}
+                    <a href="{% url 'records:episode_review_detail' item.id %}" class="title-item">
+                        <h3>{{ item.comment_title }}</h3>
+                        <p>{{ item.get_status_display }}</p>
+                        {% if item.watched_date %}
+                            <p>{{ item.watched_date }}</p>
+                        {% endif %}
+                        {% if item.rating %}
+                            <p>{{ item.rating }}</p>
+                        {% endif %}
+                        <p>{{ item.episode.episode_title }}</p>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <h3>現在表示できるデータがありません。データが追加されるとここに表示されます。</h3>
+                <ul>
+                    <li><a href="{% url 'records:episode_review_create' episode.pk %}">レビュー追加</a></li>
+                </ul>
+            {% endif %}
         </div>
     </div>
-{%endblock%}
+{% endblock %}

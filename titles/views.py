@@ -390,7 +390,7 @@ class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトか
                     title = Title(
                         title=title_name,
                         title_kana=search_title["TitleYomi"],
-                        content="".join(url for name, url in media_urls),
+                        content="\n".join(url for name, url in media_urls),
                         genre=genre,
                         season=int(season.group()) if season else 1,
                         air_date=air_date,
