@@ -37,21 +37,26 @@
     </div>
     {% for month in months %}
         <div class="title-section">
-            <h2><a href="{% url 'records:search' %}?watched_date={{ month|date:'Y-m' }}">{{ month.year }}年{{ month.month }}月</a></h2>
+            <h2>
+                <a
+                    href="{% if request.GET.type == 'episode_record' %}{% url 'records:search' %}?watched_date={{ month|date:'Y-m' }}&type=episode_record{% else %}{% url 'records:search' %}?watched_date={{ month|date:'Y-m' }}&type=record{% endif %}"
+                    >{{ month.year }}年{{ month.month }}月</a
+                >
+            </h2>
             <div class="title-container">
                 {% if watch_records %}
                     {% for item in watch_records %}
                         {% if item.watched_date.year == month.year and item.watched_date.month == month.month %}
                             <a
-                                href="{% if request.GET.type == 'record' %}{% url 'records:review_detail' item.id %}{% else %}{% url 'records:episode_review_detail' item.id %}{% endif %}"
+                                href="{% if request.GET.type == 'episode_record' %}{% url 'records:episode_review_detail' item.id %}{% else %}{% url 'records:review_detail' item.id %}{% endif %}"
                                 class="title-item"
                             >
                                 <h3>{{ item.comment_title }}</h3>
                                 <p>{{ item.watched_date }}</p>
-                                {% if request.GET.type == "record" %}
-                                    <p>{{ item.title }}</p>
-                                {% else %}
+                                {% if request.GET.type == "episode_record" %}
                                     <p>{{ item.episode.title.title }} エピソード{{ item.episode.episode_number }}</p>
+                                {% else %}
+                                    <p>{{ item.title }}</p>
                                 {% endif %}
                             </a>
                         {% endif %}
@@ -74,15 +79,18 @@
             const titleButton = buttons[0];
             const episodeButton = buttons[1];
             const type = url.searchParams.get("type");
-            if (type === "record") {
-                titleButton.click();
-            } else if (type === "episode_record") {
-                episodeButton.click();
-            }
+            const changeTab = () => {
+                if (type === "record" || type === null) {
+                    titleButton.click();
+                } else if (type === "episode_record") {
+                    episodeButton.click();
+                }
+            };
+            changeTab();
             buttons.forEach(btn => {
                 btn.addEventListener("click", function () {
-                    console.log("OK");
                     const target = this.getAttribute("data-target");
+                    changeTab();
                     if (target === "tab-titles") {
                         url.searchParams.set("type", "record");
                     } else if (target === "tab-episodes") {
