@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>{% if title %}{{ title.title }}{% else %}共有された内容からタイトルやエピソードを特定できませんでした。{% endif %}</h1>
+    <h2>{% if episode %}エピソード{{ episode.episode_number }} - {{ episode.episode_title }}{% endif %}</h2>
+    {% if episode %}<h3>{{ episode.duration }}分｜{{ episode.air_date }}</h3>{% endif %}
+    <ul>
+        {% if title %}<li><a href="{% url 'records:title_review_list' title.id %}">タイトルレビュー</a></li>{% endif %}
+        {% if episode %}<li><a href="{% url 'records:episode_review_list' episode.id %}">エピソードレビュー</a></li>{% endif %}
+    </ul>
+{% endblock %}

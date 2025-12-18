@@ -558,6 +558,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {% load static %}
         <link rel="icon" href="{% static 'favicon.ico' %}" />
+        <link rel="manifest" href="{% static 'manifest.json' %}" />
         <title>視聴記録 {% block title %}{% endblock %}</title>
     </head>
 
@@ -660,6 +661,14 @@
                     submitButton.disabled = true;
                 });
             });
+        </script>
+        <script>
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker
+                    .register("{% static 'sw.js' %}")
+                    .then(reg => console.log("Service Worker registered"))
+                    .catch(err => console.log("Service Worker registration failed"));
+            }
         </script>
         {% block scripts %}{% endblock %}
     </body>

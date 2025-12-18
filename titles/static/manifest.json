@@ -1,0 +1,55 @@
+{
+    "name": "視聴記録",
+    "short_name": "視聴記録",
+    "description": "映画・TV 番組のウォッチリストを管理するためのウェブアプリケーションです。",
+    "lang": "ja",
+    "start_url": "/?utm_source=pwa",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#1976d2",
+    "theme_color": "#1976d2",
+    "icons": [
+        {
+            "src": "/static/icons/icon16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon128.png",
+            "sizes": "128x128",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon.png",
+            "sizes": "784x778",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/icons/watchlist.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "share_target": {
+        "action": "/share",
+        "method": "GET",
+        "enctype": "application/x-www-form-urlencoded",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    }
+}
