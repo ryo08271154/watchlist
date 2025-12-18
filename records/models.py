@@ -84,7 +84,7 @@ class EpisodeWatchRecord(models.Model):
         verbose_name_plural = "エピソード視聴記録"
 
     def __str__(self):
-        return self.episode.title.title
+        return f"{self.episode.title.title} - {self.episode.episode_title or self.episode.episode_number}"
 
 
 class MyList(models.Model):

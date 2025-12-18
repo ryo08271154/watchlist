@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView, TemplateView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -10,6 +10,7 @@ from django.db.models import ManyToOneRel, ManyToManyRel, UUIDField, ManyToManyF
 from .models import Title, Episode, Tag, Genre, SubGenre
 from .forms import TitleForm, EpisodeForm, TitleFileImportForm, EpisodeFileImportForm, SourceSelectForm, SourceSearchForm
 from .utils.embed import generate_embed_html
+from .utils.extension import get_extension_download_url
 
 import csv
 import io
@@ -389,7 +390,7 @@ class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトか
                     title = Title(
                         title=title_name,
                         title_kana=search_title["TitleYomi"],
-                        content="".join(url for name, url in media_urls),
+                        content="\n".join(url for name, url in media_urls),
                         genre=genre,
                         season=int(season.group()) if season else 1,
                         air_date=air_date,
@@ -545,3 +546,12 @@ class TitleExportView(BaseExportView):
 
 class EpisodeExportView(BaseExportView):
     model = Episode
+
+
+class ExtensionInfoView(LoginRequiredMixin, TemplateView):
+    template_name = "titles/extension.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["download_url"] = get_extension_download_url()
+        return context

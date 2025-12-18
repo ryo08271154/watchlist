@@ -1,87 +1,113 @@
-{% extends 'base.html' %}
-{%block title%}{{title.title}}{%endblock%}
-{%block head%}
+{% extends 'base.html' %} {% block title %}{{ title.title }}{% endblock %} {%
+block head %}
 <style>
-    .title-container {
-        display: flex;
-        overflow-x: auto;
-        gap: 16px;
-        padding: 10px;
-        background-color: #f5f5f5;
-        border: 1px solid #ccc;
-        scroll-behavior: smooth;
-    }
+  .title-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    scroll-behavior: smooth;
+  }
 </style>
-{%endblock%}
-{%block content%}
-    <ul>
-        <li><a href="{% url 'titles:title_edit' title.id %}">編集</a></li>
-    </ul>
-    <h1>{{title.title}}</h1>
-    <h2><a href="{% url 'records:search' %}?q={{title.air_date|date:'Y-m-'}}">{{title.air_date|date:"Y年m月"}}</a>｜シーズン{{title.season}}</h2>
-    <p>{{title.content_without_url|safe|linebreaksbr}}</p>
-    {%if title.source_website%}<p>データ取得元：{{title.source_website}}</p>{%endif%}
-    <ul>
-        <li><a href="{%url 'records:add_mylist' title.id %}">マイリストに追加</a></li>
-        <li><a href="{% url 'records:title_review_list' title.id %}">レビュー</a></li>
-    </ul>
-    <div class="title-section">
-        <h2><a href="{% url 'titles:title_episodes' title.id %}">エピソード</a></h2>
-        <p>{{episodes.count}}件</p>
-        <div class="title-container">
-        {%if episodes%}
-            {% for item in episodes%}
-            <a href="{% url 'titles:episode_detail' item.id %}" class="title-item">
-            <div class="episode-item">
-                <h3>{{item.episode_title}}</h3>
-            </div>
-                <h3>エピソード{{item.episode_number}}</h3>
-                <p>{{item.air_date}}</p>
-            </a>
-            {% endfor %}
-        {%else%}
-            <h3>現在表示できるデータがありません。データが追加されるとここに表示されます。</h3>
-            <ul><li><a href="{% url 'titles:title_episode_create' title.id %}">エピソード追加</a></li><li><a href="{% url 'titles:title_episode_import_external' title.id%}">エピソードを外部サイトから追加</a></li></ul>
-        {%endif%}
-        </div>
-    </div>
-    <div class="title-section">
-        <h2>動画（外部サイト）</h2>
-        <p>{{videos|length}}件</p>
-        <div class="title-container">
-        {%if videos%}
-            {% for item in videos%}
-            <div class="episode-item">
-                {{item|safe}}
-            </div>
-            {% endfor %}
-        {%else%}
-            <h3>現在表示できるデータがありません。データが追加されるとここに表示されます。</h3>
-        {%endif%}
-        </div>
-    </div>
+{% endblock %} {% block content %}
+<ul>
+  <li><a href="{% url 'titles:title_edit' title.id %}">編集</a></li>
+</ul>
+<h1>{{ title.title }}</h1>
+<h2>
+  <a href="{% url 'records:search' %}?q={{ title.air_date|date:'Y-m-' }}"
+    >{{ title.air_date|date:"Y年m月" }}</a
+  >｜シーズン{{ title.season }}
+</h2>
+<p>{{ title.content_without_url|safe|linebreaksbr }}</p>
+{% if title.source_website %}
+<p>データ取得元：{{ title.source_website }}</p>
+{% endif %}
+<ul>
+  <li>
+    <a href="{% url 'records:add_mylist' title.id %}">マイリストに追加</a>
+  </li>
+  <li><a href="{% url 'records:title_review_list' title.id %}">レビュー</a></li>
+</ul>
 
-    {% if title.related_titles.all%}
-    <div class="title-section">
-        <h2>関連タイトル</h2>
-        <p></p>
-        <div class="title-container">
-            {% for item in title.related_titles.all%}
-            <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
-                <h3>{{item.title}}</h3>
-                <p>{{item.content_without_url|safe|linebreaksbr}}</p>
-            </a>
-            {% endfor %}
-        </div>
-    </div>
-    {%endif%}
-    {% if title.tags.all%}
-    <h3>タグ</h3>
+<div class="title-section" id="episodes">
+  <h2><a href="{% url 'titles:title_episodes' title.id %}">エピソード</a></h2>
+  <p>{{ episodes.count }}件</p>
+  <div class="title-container">
+    {% if episodes %} {% for item in episodes %}
+    <a href="{% url 'titles:episode_detail' item.id %}" class="title-item">
+      <div class="episode-item">
+        <h3>{{ item.episode_title }}</h3>
+      </div>
+      <h3>エピソード{{ item.episode_number }}</h3>
+      <p>{{ item.air_date }}</p>
+    </a>
+    {% endfor %} {% else %}
+    <h3>
+      現在表示できるデータがありません。データが追加されるとここに表示されます。
+    </h3>
     <ul>
-        {%for i in title.tags.all%}
-        <li><a href="{% url 'records:tag_detail' i.id%}">{{i.name}}</a></li>
-        {%endfor%}
+      <li>
+        <a href="{% url 'titles:title_episode_create' title.id %}"
+          >エピソード追加</a
+        >
+      </li>
+      <li>
+        <a href="{% url 'titles:title_episode_import_external' title.id %}"
+          >エピソードを外部サイトから追加</a
+        >
+      </li>
     </ul>
     {% endif %}
-
-{%endblock%}
+  </div>
+</div>
+{% if videos %}
+<div class="title-section" id="videos">
+  <h2>動画（外部サイト）</h2>
+  <p>{{ videos|length }}件</p>
+  <div class="title-container">
+    {% for item in videos %}
+    <div class="episode-item">{{ item|safe }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %} {% if title.related_titles.all %}
+<div class="title-section" id="related_titles">
+  <h2>関連タイトル</h2>
+  <p></p>
+  <div class="title-container">
+    {% for item in title.related_titles.all %}
+    <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.content_without_url|safe|linebreaksbr }}</p>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %} {% if title.urls_in_content or title.website %}
+<h3 id="links">リンク</h3>
+<ul>
+  {% if title.website %}
+  <li>
+    <a href="{{ title.website }}" target="_blank" rel="noopener noreferrer"
+      >公式サイト</a
+    >
+  </li>
+  {% endif %} {% for link in title.urls_in_content %}
+  <li>
+    <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"
+      >{{ link.parsed.netloc }}</a
+    >
+  </li>
+  {% endfor %}
+</ul>
+{% endif %} {% if title.tags.all %}
+<h3 id="tags">タグ</h3>
+<ul>
+  {% for i in title.tags.all %}
+  <li><a href="{% url 'records:tag_detail' i.id %}">{{ i.name }}</a></li>
+  {% endfor %}
+</ul>
+{% endif %} {% endblock %}

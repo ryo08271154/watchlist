@@ -1,39 +1,39 @@
 {% extends 'base.html' %}
-{%block head%}
-<style>
-    .title-container {
-        display: flex;
-        overflow-x: auto;
-        gap: 16px;
-        padding: 10px;
-        background-color: #f5f5f5;
-        border: 1px solid #ccc;
-        scroll-behavior: smooth;
-        min-height: 100px;
-    }
-</style>
-{%endblock%}
-{%block content%}
-{%for day_episodes , day in data%}
-    <div class="title-section">
-        <h2>{{day|date:"m月d日"}}</h2>
-        <p></p>
-        <div class="title-container">
-        {%if day_episodes%}
-            {% for item in day_episodes%}
-            <a href="{% url 'titles:episode_detail' item.id %}" class="title-item">
-                <div class="episode-item">
-                    <h3>{{item.episode_title}}</h3>
-                </div>
-                <h3>エピソード{{item.episode_number}}</h3>
-                <p>{{item.air_date}}</p>
-                <p>{{item.title}}</p>
-            </a>
-            {% endfor %}
-        {%else%}
-            <h3>見つかりませんでした</h3>
-        {%endif%}
+{% block head %}
+    <style>
+        .title-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            scroll-behavior: smooth;
+            min-height: 100px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    {% for day_episodes , day in data %}
+        <div class="title-section">
+            <h2>{{ day|date:"m月d日 (D)" }}</h2>
+            <p></p>
+            <div class="title-container">
+                {% if day_episodes %}
+                    {% for item in day_episodes %}
+                        <a href="{% url 'titles:episode_detail' item.id %}" class="title-item">
+                            <div class="episode-item">
+                                <h3>{{ item.episode_title }}</h3>
+                            </div>
+                            <h3>エピソード{{ item.episode_number }}</h3>
+                            <p>{{ item.air_date }}</p>
+                            <p>{{ item.title }}</p>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <h3>見つかりませんでした</h3>
+                {% endif %}
+            </div>
         </div>
-    </div>
-{%endfor%}
-{%endblock%}
+    {% endfor %}
+{% endblock %}

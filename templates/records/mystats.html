@@ -1,73 +1,73 @@
 {% extends 'base.html' %}
-{%block head%}
+{% block head %}
     <style>
-    img {
-        display: block;
-        margin: 0 auto;
-        max-width: 100%;
-        height: auto;
-    }
-    .stats-container {
-        display: flex;
-        gap: 16px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-    }
-
-    .stat-box {
-        background-color: #f0f0f0;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-align: center;
-        text-overflow: ellipsis;
-        min-width: 100px
-    }
-
-    .stat-label {
-        font-weight: bold;
-        display: block;
-    }
-
-    .stat-value {
-        font-size: 1.2em;
-    }
-    @media (max-width: 600px) {
-        .stat-box{
-            min-width: 50px;
-            flex-wrap: wrap;
-            
+        img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
         }
-    }
-    </style>
-{%endblock%}
-{%block content%}<div class="stats-container">
-    <div class="stat-box">
-        <span class="stat-label">視聴作品数</span>
-        <span class="stat-value">{{total_watched}}</span>
-    </div>
-    <div class="stat-box">
-        <span class="stat-label">視聴シリーズ</span>
-        <span class="stat-value">{{total_watched_series}}</span>
-    </div>
-    <div class="stat-box">
-        <span class="stat-label">視聴エピソード数</span>
-        <span class="stat-value">{{total_episode}}</span>
-    </div>
-    <div class="stat-box">
-        <span class="stat-label">視聴時間</span>
-        <span class="stat-value">{{total_duration}}時間</span>
-    </div>
-    <div class="stat-box">
-        <span class="stat-label">視聴回数</span>
-        <span class="stat-value">{{watched_count}}</span>
-    </div>
-    <div class="stat-box">
-        <span class="stat-label">エピソード視聴回数</span>
-        <span class="stat-value">{{episode_count}}</span>
-    </div>
-</div>
+        .stats-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
 
-<img src="data:image/png;base64,{{watched_graph|safe}}" alt="月間視聴数グラフ">
-<img src="data:image/png;base64,{{watched_duration_graph|safe}}" alt="月間視聴時間グラフ">
-<img src="data:image/png;base64,{{watched_season_graph|safe}}" alt="放送時期別視聴グラフ">
-{%endblock%}
+        .stat-box {
+            background-color: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            text-overflow: ellipsis;
+            min-width: 100px;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+        }
+        @media (max-width: 600px) {
+            .stat-box {
+                min-width: 50px;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="stats-container">
+        <div class="stat-box">
+            <span class="stat-label">視聴タイトル数</span>
+            <span class="stat-value">{{ total_watched }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">視聴シリーズ数</span>
+            <span class="stat-value">{{ total_watched_series }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">視聴エピソード数</span>
+            <span class="stat-value">{{ total_episode }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">視聴時間</span>
+            <span class="stat-value">{{ total_duration }}時間</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">視聴回数</span>
+            <span class="stat-value">{{ watched_count }}</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">エピソード視聴回数</span>
+            <span class="stat-value">{{ episode_count }}</span>
+        </div>
+    </div>
+
+    <img src="data:image/png;base64,{{ watched_graph|safe }}" alt="月間視聴数グラフ" />
+    <img src="data:image/png;base64,{{ watched_duration_graph|safe }}" alt="月間視聴時間グラフ" />
+    <img src="data:image/png;base64,{{ watched_season_graph|safe }}" alt="放送時期別視聴グラフ" />
+{% endblock %}

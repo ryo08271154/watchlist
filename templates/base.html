@@ -1,318 +1,666 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-
-<head>
-    <style>
-        a {
-            color: black;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        a:hover,
-        a:focus {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        body {
-            font-family: sans-serif;
-            background-color: #fafbfc;
-            margin: 0;
-            padding: 0;
-            padding-top: 200px;
-        }
-
-        header {
-            min-height: 150px;
-            max-height: 200px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: #fafbfc;
-            opacity: 0.9;
-        }
-        .title-section h2 {
-            background-color: #e8e8e8;
-            display: inline;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-
-        .title-section p {
-            background-color: #f5f5f5;
-            display: inline;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            margin: 0;
-            font-size: smaller;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: gray;
-        }
-
-        .title-item {
-            min-width: 150px;
-            max-width: 150px;
-            min-height: 100px;
-            flex-shrink: 0;
-            background-color: white;
-            padding: 16px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .title-item h3 {
-            margin: 0 0 10px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-        }
-
-        .title-item p {
-            background-color: transparent;
-            display: block;
-            border: none;
-            border-radius: 8px;
-            color: black;
-            margin: 0;
-            font-size: smaller;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .episode-item {
-            min-width: 150px;
-            min-height: 100px;
-            flex-shrink: 0;
-            background-color: #e0f2f7;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .episode-item h3 {
-            color: #1565c0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-        }
-
-        .episode-item p {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-        }
-
-        /* メッセージ表示 */
-        .messages {
-            list-style: none;
-            padding: 0.5em 1em;
-            margin: 1em 0;
-            border-radius: 8px;
-            background: #fffbe7;
-            border: 1px solid #ffe082;
-            box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.04);
-        }
-
-        .messages li {
-            margin: 0.2em 0;
-            font-size: 1em;
-        }
-
-        .messages .error,
-        .messages .danger {
-            color: #b71c1c;
-            background: #ffebee;
-            border-left: 4px solid #e53935;
-            padding-left: 0.5em;
-        }
-
-        .messages .success {
-            color: #1b5e20;
-            background: #e8f5e9;
-            border-left: 4px solid #43a047;
-            padding-left: 0.5em;
-        }
-
-        .messages .warning {
-            color: #f57f17;
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding-left: 0.5em;
-        }
-
-        /* ナビゲーションリスト */
-        .nav-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 1em 0;
-            display: flex;
-            gap: 1em;
-        }
-
-        ul li {
-            margin: 0;
-        }
-
-        ul li a {
-            display: inline-block;
-            padding: 0.5em 1em;
-        }
-
-        /* 検索フォーム・ログアウトフォーム */
-        .top-bar form {
-            margin: 0.5em 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-            margin: 0;
-            flex-shrink: 1;
-        }
-
-        input[type="search"] {
-            padding: 0.4em 0.8em;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 1em;
-            background: #fff;
-            transition: border 0.2s;
-        }
-
-        input[type="search"]:focus {
-            border: 1.5px solid #1976d2;
-            outline: none;
-        }
-
-        button {
-            padding: 0.4em 1em;
-            border: none;
-            border-radius: 8px;
-            background: #1976d2;
-            color: #fff;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        button:hover,
-        button:focus {
-            background: #1565c0;
-        }
-
-        .logout {
-            margin-right: 0.5em;
-            font-weight: bold;
-        }
-
-        /* h1 タイトル */
-        h1 {
-            margin: 0.5em 0 0.5em 0.2em;
-            font-size: 2em;
-            letter-spacing: 0.05em;
-        }
-
-        h1 a {
-            color: #1976d2;
-            text-shadow: 1px 1px 0 #e3f2fd;
-        }
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            gap: 1.5em;
-            margin-bottom: 0.5em;
-        }
-
-        .nav-list {
-            margin: 0;
-            gap: 0.5em;
-        }
-
-        /* レスポンシブ対応 */
-        @media (max-width: 600px) {
-            ul {
-                gap: 0.5em;
+    <head>
+        <style>
+            a {
+                color: black;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: background 0.2s;
             }
 
-            .top-bar {
-                flex-direction: column;
-                gap: 0.5em;
+            a:hover,
+            a:focus {
+                background: #e3f2fd;
+                color: #1565c0;
             }
 
+            body {
+                font-family: sans-serif;
+                background-color: #fafbfc;
+                margin: 0;
+                padding: 0;
+                padding-top: 200px;
+            }
+
+            header {
+                min-height: 150px;
+                max-height: 200px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background-color: #fafbfc;
+                opacity: 0.9;
+            }
+            .title-section h2 {
+                background-color: #e8e8e8;
+                display: inline;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+            }
+
+            .title-section p {
+                background-color: #f5f5f5;
+                display: inline;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                margin: 0;
+                font-size: smaller;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: gray;
+            }
+
+            .title-item {
+                min-width: 150px;
+                max-width: 150px;
+                min-height: 100px;
+                flex-shrink: 0;
+                background-color: white;
+                padding: 16px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .title-item h3 {
+                margin: 0 0 10px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .title-item p {
+                background-color: transparent;
+                display: block;
+                border: none;
+                border-radius: 8px;
+                color: black;
+                margin: 0;
+                font-size: smaller;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .episode-item {
+                min-width: 150px;
+                min-height: 100px;
+                flex-shrink: 0;
+                background-color: #e0f2f7;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .episode-item h3 {
+                color: #1565c0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .episode-item p {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            /* メッセージ表示 */
+            .messages {
+                list-style: none;
+                padding: 0.5em 1em;
+                margin: 1em 0;
+                border-radius: 8px;
+                background: #fffbe7;
+                border: 1px solid #ffe082;
+                box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.04);
+            }
+
+            .messages li {
+                margin: 0.2em 0;
+                font-size: 1em;
+            }
+
+            .messages .error,
+            .messages .danger {
+                color: #b71c1c;
+                background: #ffebee;
+                border-left: 4px solid #e53935;
+                padding-left: 0.5em;
+            }
+
+            .messages .success {
+                color: #1b5e20;
+                background: #e8f5e9;
+                border-left: 4px solid #43a047;
+                padding-left: 0.5em;
+            }
+
+            .messages .warning {
+                color: #f57f17;
+                background: #fff3e0;
+                border-left: 4px solid #ff9800;
+                padding-left: 0.5em;
+            }
+
+            /* ナビゲーションリスト */
             .nav-list ul {
-                flex-wrap: wrap;
-                /* 折り返し許可 */
-                gap: 0.2em;
+                list-style: none;
+                padding: 0;
+                margin: 1em 0;
+                display: flex;
+                gap: 1em;
             }
 
-            .nav-list ul li a {
-                padding: 0.3em 0.6em;
-                /* パディングを小さく */
-                font-size: 0.9em;
-                /* フォントサイズを小さく */
+            ul li {
+                margin: 0;
+            }
+
+            ul li a {
+                display: inline-block;
+                padding: 0.5em 1em;
+            }
+
+            /* 検索フォーム・ログアウトフォーム */
+            .top-bar form {
+                margin: 0.5em 0;
+                display: flex;
+                align-items: center;
+                gap: 0.5em;
+                margin: 0;
+                flex-shrink: 1;
+            }
+
+            input[type="search"] {
+                padding: 0.4em 0.8em;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                font-size: 1em;
+                background: #fff;
+                transition: border 0.2s;
+            }
+
+            input[type="search"]:focus {
+                border: 1.5px solid #1976d2;
+                outline: none;
+            }
+
+            button {
+                padding: 0.4em 1em;
+                border: none;
+                border-radius: 8px;
+                background: #1976d2;
+                color: #fff;
+                font-size: 1em;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+            button:hover,
+            button:focus {
+                background: #1565c0;
             }
 
             .logout {
+                margin-right: 0.5em;
+                font-weight: bold;
+            }
+            /* フォームスタイル（汎用） */
+            form:not(.top-bar form) {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+                padding: 0.6em 0;
+
+                /* PCで中央に表示 */
+                width: 100%;
+                max-width: 880px;
+                margin: 0 auto;
+            }
+
+            form:not(.top-bar form) label {
+                display: block;
+                font-weight: 600;
+                color: #222;
+                white-space: normal;
+                font-size: 1rem;
+                margin: 0;
+            }
+
+            form:not(.top-bar form) input[type="search"],
+            form:not(.top-bar form) input[type="text"],
+            form:not(.top-bar form) input[type="email"],
+            form:not(.top-bar form) input[type="password"],
+            form:not(.top-bar form) input[type="number"],
+            form:not(.top-bar form) input[type="date"],
+            form:not(.top-bar form) input[type="datetime-local"],
+            form:not(.top-bar form) input[type="time"],
+            form:not(.top-bar form) input[type="url"],
+            form:not(.top-bar form) input[type="tel"],
+            form:not(.top-bar form) textarea,
+            form:not(.top-bar form) select {
+                width: 100%;
+                min-width: 0; /* Flexboxコンテナ内での縮小を許可 */
+                padding: 0.75em 1em;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                font-size: 1rem;
+                background: #fff;
+                transition:
+                    border-color 0.18s,
+                    box-shadow 0.18s,
+                    background-color 0.18s;
+                font-family: sans-serif;
+                box-sizing: border-box;
+            }
+
+            /* disabled状態のスタイル */
+            form:not(.top-bar form) input[type="search"]:disabled,
+            form:not(.top-bar form) input[type="text"]:disabled,
+            form:not(.top-bar form) input[type="email"]:disabled,
+            form:not(.top-bar form) input[type="password"]:disabled,
+            form:not(.top-bar form) input[type="number"]:disabled,
+            form:not(.top-bar form) input[type="date"]:disabled,
+            form:not(.top-bar form) input[type="datetime-local"]:disabled,
+            form:not(.top-bar form) input[type="time"]:disabled,
+            form:not(.top-bar form) input[type="url"]:disabled,
+            form:not(.top-bar form) input[type="tel"]:disabled,
+            form:not(.top-bar form) textarea:disabled,
+            form:not(.top-bar form) select:disabled {
+                background-color: #f5f5f5;
+                color: #999;
+                border-color: #e0e0e0;
+                cursor: not-allowed;
+                opacity: 0.7;
+            }
+
+            form:not(.top-bar form) select {
+                min-height: 40px;
+                padding: 0.5em;
+            }
+
+            form:not(.top-bar form) select[multiple] {
+                min-height: 150px;
+            }
+
+            form:not(.top-bar form) input[type="search"]:focus,
+            form:not(.top-bar form) input[type="text"]:focus,
+            form:not(.top-bar form) input[type="email"]:focus,
+            form:not(.top-bar form) input[type="password"]:focus,
+            form:not(.top-bar form) input[type="number"]:focus,
+            form:not(.top-bar form) input[type="date"]:focus,
+            form:not(.top-bar form) input[type="datetime-local"]:focus,
+            form:not(.top-bar form) input[type="time"]:focus,
+            form:not(.top-bar form) input[type="url"]:focus,
+            form:not(.top-bar form) input[type="tel"]:focus,
+            form:not(.top-bar form) textarea:focus,
+            form:not(.top-bar form) select:focus {
+                border-color: #1976d2; /* レイアウトシフトを防ぐため幅は変えず色のみ変更 */
+                outline: none;
+                box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.08);
+            }
+
+            form:not(.top-bar form) textarea {
+                resize: vertical;
+                min-height: 120px;
+            }
+
+            form:not(.top-bar form) .check-row,
+            form:not(.top-bar form) .radio-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            form:not(.top-bar form) input[type="checkbox"] {
+                /* クリックしやすい大きさに */
+                width: 22px;
+                height: 22px;
+                cursor: pointer;
+                margin: 0 8px 0 0;
+                /* カスタムスタイル */
+                -webkit-appearance: none;
+                appearance: none;
+                border: 1px solid #cfcfcf;
+                border-radius: 6px;
+                background: #fff;
+                position: relative;
+                vertical-align: middle;
+                flex-shrink: 0; /* チェックボックスの縮小を防止 */
+                transition:
+                    background-color 0.18s,
+                    border-color 0.18s,
+                    opacity 0.18s;
+            }
+
+            /* チェックボックスのdisabled状態 */
+            form:not(.top-bar form) input[type="checkbox"]:disabled {
+                background-color: #f5f5f5;
+                border-color: #e0e0e0;
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+
+            form:not(.top-bar form) input[type="checkbox"]:disabled:checked {
+                background-color: #b0b0b0;
+                border-color: #b0b0b0;
+            }
+
+            form:not(.top-bar form) input[type="checkbox"]:checked {
+                background: #1976d2;
+                border-color: #1976d2;
+            }
+
+            form:not(.top-bar form) input[type="checkbox"]:checked::after {
+                content: "";
+                position: absolute;
+                /* 中央配置（相対位置） */
+                left: 50%;
+                top: 50%;
+                width: 6px;
+                height: 10px;
+                border: solid #fff;
+                border-width: 0 2px 2px 0;
+                transform: translate(-50%, -60%) rotate(45deg);
+            }
+
+            form:not(.top-bar form) input[type="checkbox"]:focus {
+                outline: none;
+                box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.1);
+            }
+
+            /* ラベル全体をクリック可能に */
+            form:not(.top-bar form) input[type="checkbox"] + label,
+            form:not(.top-bar form) label.checkbox-label {
+                cursor: pointer;
+                user-select: none; /* テキスト選択を防止 */
+            }
+
+            /* disabledチェックボックスのラベル */
+            form:not(.top-bar form) input[type="checkbox"]:disabled + label,
+            form:not(.top-bar form) input[type="checkbox"]:disabled ~ label {
+                color: #999;
+                cursor: not-allowed;
+                opacity: 0.7;
+            }
+
+            form:not(.top-bar form) button {
+                white-space: nowrap;
+                padding: 0.7em 1.2em;
+                font-size: 1rem;
+                min-width: 110px;
+                border-radius: 10px;
+                align-self: center;
+                transition:
+                    background-color 0.18s,
+                    opacity 0.18s,
+                    transform 0.1s;
+                cursor: pointer;
+            }
+
+            /* ボタンのdisabled状態 */
+            form:not(.top-bar form) button:disabled {
+                background-color: #e0e0e0;
+                color: #999;
+                cursor: not-allowed;
+                opacity: 0.6;
+                box-shadow: none;
+            }
+
+            /* disabled時はホバー効果を無効化 */
+            form:not(.top-bar form) button:disabled:hover {
+                transform: none;
+                background-color: #e0e0e0;
+            }
+
+            /* 通常のボタンホバー効果（disabled時は適用されない） */
+            form:not(.top-bar form) button:not(:disabled):hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            form:not(.top-bar form) button:not(:disabled):active {
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            /* h1 タイトル */
+            h1 {
+                margin: 0.5em 0 0.5em 0.2em;
+                font-size: 2em;
+                letter-spacing: 0.05em;
+            }
+
+            h1 a {
+                color: #1976d2;
+                text-shadow: 1px 1px 0 #e3f2fd;
+            }
+
+            .top-bar {
+                display: flex;
+                align-items: center;
+                gap: 1.5em;
+                margin-bottom: 0.5em;
+            }
+
+            .nav-list {
+                margin: 0;
+                gap: 0.5em;
+            }
+            .title-container {
+                display: flex;
+                overflow-x: auto;
+                gap: 16px;
+                padding: 10px;
+                background-color: #f5f5f5;
+                border: 1px solid #ccc;
+                scroll-behavior: smooth;
+                min-height: 100px;
+            }
+            .tab-button {
+                padding: 8px 16px;
+                border: none;
+                background-color: #f0f0f0;
+                color: #333;
+                cursor: pointer;
+                transition:
+                    background-color 0.2s,
+                    color 0.2s;
+            }
+
+            .tab-button:hover {
+                background-color: #e0e0e0;
+            }
+
+            .tab-button.active {
+                background-color: #1976d2; /* 青色 */
+                color: #fff; /* 文字色を白に */
+            }
+
+            .tab-content {
                 display: none;
             }
 
-            button[id="logout"] {
-                display: none;
+            .tab-content.active {
+                display: block;
             }
-        }
-    </style>
-    {% block head %}{% endblock%}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>視聴記録 {% block title %}{% endblock %}</title>
-</head>
+            /* レスポンシブ対応 */
+            @media (max-width: 600px) {
+                ul {
+                    gap: 0.5em;
+                }
 
-<body>
-    <header>
-        <h1><a href="{%url 'records:index'%}">視聴記録</a></h1>
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        <div class="top-bar">
-            <form action="{%url 'records:search'%}" autocomplete="off" method="get">
-                <label for="title">検索</label>
-                <input type="search" id="title" name="q" placeholder="検索語句を入力" />
-                <button type="submit">検索</button>
-            </form>
-            <nav class="nav-list">
-                <ul>
-                    <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
-                    <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
-                    <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
+                .top-bar {
+                    flex-direction: column;
+                    gap: 0.5em;
+                }
+
+                .nav-list ul {
+                    flex-wrap: wrap;
+                    /* 折り返し許可 */
+                    gap: 0.2em;
+                }
+
+                .nav-list ul li a {
+                    padding: 0.3em 0.6em;
+                    /* パディングを小さく */
+                    font-size: 0.9em;
+                    /* フォントサイズを小さく */
+                }
+
+                .logout {
+                    display: none;
+                }
+
+                button[id="logout"] {
+                    display: none;
+                }
+
+                form:not(.top-bar form) {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                form:not(.top-bar form) label {
+                    font-size: 0.98rem;
+                }
+
+                form:not(.top-bar form) input[type="search"],
+                form:not(.top-bar form) input[type="text"],
+                form:not(.top-bar form) textarea,
+                form:not(.top-bar form) select {
+                    min-width: 0;
+                    width: 100%;
+                    padding: 0.65em 0.9em;
+                    font-size: 1rem;
+                }
+
+                form:not(.top-bar form) button {
+                    width: 100%;
+                    min-width: 0;
+                }
+            }
+        </style>
+        {% block head %}{% endblock %}
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {% load static %}
+        <link rel="icon" href="{% static 'favicon.ico' %}" />
+        <title>視聴記録 {% block title %}{% endblock %}</title>
+    </head>
+
+    <body>
+        <header>
+            <h1><a href="{% url 'records:index' %}">視聴記録</a></h1>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
                 </ul>
-            </nav>
-            <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto;">{% csrf_token %}<a
-                    href="{% url 'accounts:login' %}" class="logout">
-                    {%if user.nickname%}{{user.nickname}}{%else%}ユーザー{%endif%}</a><button type="submit"
-                    id="logout">ログアウト</button></form>
-        </div>
-    </header>
-    {% block content %}
-    {% endblock %}
-</body>
+            {% endif %}
+            <div class="top-bar">
+                <form action="{% url 'records:search' %}" autocomplete="off" method="get">
+                    <label for="title">検索</label>
+                    <input type="search" id="title" name="q" placeholder="検索語句を入力" />
+                    <button type="submit">検索</button>
+                </form>
+                <nav class="nav-list">
+                    <ul>
+                        <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
+                        <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
+                        <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
+                        <li><a href="#" id="openMenu">メニュー</a></li>
+                    </ul>
+                </nav>
+                <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
+                    {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
+                        {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
+                    ><button type="submit" id="logout">ログアウト</button>
+                </form>
+            </div>
+            <dialog id="menu">
+                <ul>
+                    <li><a href="{% url 'records:mylist' %}">マイリスト</a></li>
+                    <li>
+                        <a href="{% url 'titles:watch_schedule' %}">視聴スケジュール</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/ryo08271154/watchlist" target="_blank">ソースコード</a>
+                    </li>
+                    <li><a href="{% url 'titles:extension' %}">拡張機能</a></li>
+                </ul>
+                <button id="closeMenu">閉じる</button>
+            </dialog>
+        </header>
+        {% block content %}{% endblock %}
+        <script>
+            const openMenu = document.getElementById("openMenu");
+            const menu = document.getElementById("menu");
+            const closeMenu = document.getElementById("closeMenu");
+            openMenu.addEventListener("click", event => {
+                event.preventDefault();
+                menu.showModal();
+                closeMenu.focus();
+            });
+            closeMenu.addEventListener("click", () => {
+                menu.close();
+            });
+            menu.addEventListener("click", event => {
+                const rect = menu.getBoundingClientRect();
+                const inDialog =
+                    rect.top <= event.clientY && event.clientY <= rect.bottom && rect.left <= event.clientX && event.clientX <= rect.right;
 
+                if (!inDialog) {
+                    menu.close();
+                }
+            });
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const buttons = document.querySelectorAll(".tab-button");
+                const contents = document.querySelectorAll(".tab-content");
+
+                buttons.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        // ボタンのactive切り替え
+                        buttons.forEach(b => b.classList.remove("active"));
+                        btn.classList.add("active");
+
+                        // 対応するコンテンツ表示
+                        contents.forEach(c => c.classList.remove("active"));
+                        document.getElementById(btn.dataset.target).classList.add("active");
+                    });
+                });
+            });
+        </script>
+        <script>
+            const forms = document.querySelectorAll("form");
+
+            forms.forEach(form => {
+                const submitButton = form.querySelector("button[type='submit']");
+                form.addEventListener("submit", event => {
+                    if (submitButton.disabled) {
+                        event.preventDefault();
+                        alert("送信処理が既に行われています。");
+                        return;
+                    }
+                    submitButton.disabled = true;
+                });
+            });
+        </script>
+        {% block scripts %}{% endblock %}
+    </body>
 </html>

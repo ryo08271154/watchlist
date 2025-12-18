@@ -91,7 +91,7 @@ def recommended_topic(request):
     watched_sub_genre_list = list(
         watched_list.values_list("title__sub_genre", flat=True))
     watched_tag_list = list(watched_list.values_list("title__tags", flat=True))
-    average_rating = watched_list.aggregate(Avg("rating"))["rating__avg"]
+    average_rating = watched_list.aggregate(Avg("rating"))["rating__avg"] or 0
     unique_genres = list(set(watched_genre_list))
     unique_sub_genres = list(set(watched_sub_genre_list))
     unique_tags = list(set(watched_tag_list))
