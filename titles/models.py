@@ -80,6 +80,15 @@ class Title(models.Model):
             r"https?://(?![\w.-]*(?:youtube\.com|youtu\.be|nicovideo\.jp|ch\.nicovideo\.jp))[\w/:%#$&?()~.=+-]+", self.content)
         return [{"url": url, "parsed": urlparse(url)} for url in urls]
 
+    @property
+    def source_website_name(self):
+        if not self.source_website:
+            return None
+        host_name = urlparse(self.source_website).hostname
+        if host_name == "cal.syoboi.jp":
+            return "しょぼいカレンダー"
+        return host_name
+
     class Meta:
         verbose_name = "タイトル"
         verbose_name_plural = "タイトル"
@@ -103,6 +112,15 @@ class Episode(models.Model):
     tags = models.ManyToManyField(Tag, blank=True, verbose_name="タグ")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def source_website_name(self):
+        if not self.source_website:
+            return None
+        host_name = urlparse(self.source_website).hostname
+        if host_name == "cal.syoboi.jp":
+            return "しょぼいカレンダー"
+        return host_name
 
     class Meta:
         verbose_name = "エピソード"

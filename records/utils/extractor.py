@@ -67,7 +67,6 @@ class Extractor:
     def split_into_words(self, text: str) -> List[str]:
         normalized = self._normalize_text(text)
         words = re.split(r"[ 　\|｜{}【】（）()*~・「」『』《》<>、。・@＠をでに]", normalized)
-        print(words)
         return [word for word in words if word]
 
     def _should_skip_word(self, word: str) -> bool:
@@ -81,7 +80,6 @@ class Extractor:
     def get_episode_number(self, text: str) -> int:
         pattern = r"(Episode|エピソード|#|＃|EP)(\d+)|(\d+)(話)"
         match = re.search(pattern, text)
-        print(match)
         if match:
             episode_number = int(match.group(1))
             return episode_number
@@ -103,7 +101,6 @@ class Extractor:
                 # エピソードが存在するか確認
                 episode = Episode.objects.filter(
                     title__in=matched, episode_number=episode_number)
-                print(episode, episode_number)
                 if episode.exists():
                     return episode.first().title
             else:
