@@ -10,7 +10,7 @@ from django.db.models import ManyToOneRel, ManyToManyRel, UUIDField, ManyToManyF
 from .models import Title, Episode, Tag, Genre, SubGenre
 from .forms import TitleForm, EpisodeForm, TitleFileImportForm, EpisodeFileImportForm, SourceSelectForm, SourceSearchForm
 from .utils.embed import generate_embed_html
-from .utils.extension import get_extension_download_url
+from .utils.extension import get_extension_download_url, get_extension_assets
 
 import csv
 import io
@@ -553,5 +553,10 @@ class ExtensionInfoView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["download_url"] = get_extension_download_url()
+        user_agent = self.request.META.get("HTTP_USER_AGENT", "").lower()
+        if "chrome" in user_agent:
+            context["download_url"] = get_extension_download_url()
+        elif "firefox" in user_agent:
+            context["download_url"] = get_extension_assets(
+                "xpi").get("browser_download_url")
         return context

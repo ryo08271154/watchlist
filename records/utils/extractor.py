@@ -81,7 +81,9 @@ class Extractor:
         pattern = r"(Episode|エピソード|#|＃|EP)(\d+)|(\d+)(話)"
         match = re.search(pattern, text)
         if match:
-            episode_number = int(match.group(1))
+            episode_number = int(
+                match.group(2) if match.group(2) else match.group(3)
+            )
             return episode_number
         return 0
 
