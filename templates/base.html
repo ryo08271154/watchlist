@@ -495,6 +495,17 @@
             .tab-content.active {
                 display: block;
             }
+
+            .card {
+                background: #fff;
+                border: 1px solid #eee;
+                border-radius: 12px;
+                padding: 1rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                display: flex;
+                gap: 1rem;
+                align-items: flex-start;
+            }
             /* レスポンシブ対応 */
             @media (max-width: 600px) {
                 ul {
@@ -556,6 +567,7 @@
         {% block head %}{% endblock %}
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#1976d2" />
         {% load static %}
         <link rel="icon" href="{% static 'favicon.ico' %}" />
         <link rel="manifest" href="{% static 'manifest.json' %}" />

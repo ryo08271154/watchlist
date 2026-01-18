@@ -1,7 +1,7 @@
 {
     "name": "視聴記録",
     "short_name": "視聴記録",
-    "description": "映画・TV 番組のウォッチリストを管理するためのウェブアプリケーションです。",
+    "description": "視聴した映画・TV番組を記録できるウェブアプリケーションです。",
     "lang": "ja",
     "start_url": "/?utm_source=pwa",
     "scope": "/",

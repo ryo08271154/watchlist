@@ -11,6 +11,7 @@ from titles.views import BaseExportView, csv_file_read, tags_add
 from django.db.models import Q, Sum
 from django.utils import timezone
 from .utils.topic import watched_date_month_topic, watched_date_year_topic, tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic, today_episode_topic, recommended_topic
+from .utils.extractor import TitleExtractor, EpisodeExtractor
 
 import csv
 import io
@@ -829,36 +830,14 @@ class ExportView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class AddFromShareView(LoginRequiredMixin, TemplateView):
+class AddFromShareView(LoginRequiredMixin, TemplateView, TitleExtractor, EpisodeExtractor):
     template_name = "records/add_from_share.html"
 
-    def _extract_title(self, title: str, text: str):
-        matched_title = None
-        keywords = [*title.split(), *text.split()]
-        for keyword in keywords:
-            if len(keyword) <= 3:
-                continue
-            matched_titles = Title.objects.filter(title__icontains=keyword[:5])
-            if len(matched_titles) != 0 and len(matched_titles) < 5:
-                matched_title = matched_titles.first()
-        return matched_title
-
-    def _extract_episode(self, title_obj: Title, title: str, text: str):
-        pattern = r"(Episode|エピソード|#)(\d+)|(\d+)(話)"
-        for keyword in [title, text]:
-            match = re.search(pattern, keyword)
-            if match:
-                episode_number = int(
-                    match.group(2) if match.group(2) else match.group(3)
-                )
-                return Episode.objects.filter(title=title_obj, episode_number=episode_number).first()
-        return None
-
     def _parse_shared_content(self, title: str, text: str, url: str):
-        matched_title = self._extract_title(title, text)
+        matched_title = self.extract_title(title, text)
         if not matched_title:
             return None
-        matched_episode = self._extract_episode(matched_title, title, text)
+        matched_episode = self.extract_episode(matched_title, title, text)
         return {"title": matched_title, "episode": matched_episode}
 
     def get_context_data(self, **kwargs):
