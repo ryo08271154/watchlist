@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import WatchRecord, EpisodeWatchRecord, MyList, WatchMethod
 from .forms import ReviewForm, EpisodeReviewForm, MyListForm, ReviewFileImportForm, ExportForm, MyListAddTitleForm
 from titles.models import Title, Genre, SubGenre, Tag, Episode
-from titles.views import BaseExportView, csv_file_read, tags_add
+from titles.views import BaseExportView, read_csv_file, add_tags
 from django.db.models import Q, Sum
 from django.utils import timezone
 from .utils.topic import watched_date_month_topic, watched_date_year_topic, tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic, today_episode_topic, recommended_topic
@@ -57,7 +57,7 @@ class BaseReviewCreateView(LoginRequiredMixin, CreateView):
         setattr(review, self.field_name, self.object_model.objects.get(
             id=self.kwargs["pk"]))  # 元のタイトルやエピソードを追加する
         review.save()
-        tags_add(review, "comment")
+        add_tags(review, "comment")
         messages.success(self.request, "レビューを追加しました")
         self.success_url = reverse_lazy(
             self.success_url_name, kwargs={"pk": review.id})
@@ -79,7 +79,7 @@ class BaseReviewEditView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         review = form.save()
-        tags_add(review, "comment")
+        add_tags(review, "comment")
         self.success_url = reverse_lazy(
             self.success_url_name, kwargs={"pk": review.id})
         messages.success(self.request, "レビューを編集しました")
@@ -176,7 +176,7 @@ class ReviewImportView(LoginRequiredMixin, FormView):  # レビューをファ�
         watch_method_column = form.cleaned_data["watch_method_column"]-1
         count = 0
         try:
-            reader = csv_file_read(self.request.FILES["file"])
+            reader = read_csv_file(self.request.FILES["file"])
         except Exception as e:
             messages.error(self.request, f"ファイルの読み込みに失敗しました")
             return super().form_invalid(form)
@@ -290,7 +290,7 @@ class MyListCreateView(LoginRequiredMixin, CreateView):  # マイリストを作
         mylist = form.save(commit=False)
         mylist.user = self.request.user
         mylist.save()
-        tags_add(mylist, "description")
+        add_tags(mylist, "description")
         self.success_url = reverse_lazy(
             "records:mylist_detail", kwargs={"pk": mylist.id})
         messages.success(self.request, "リストを作成しました")
@@ -309,7 +309,7 @@ class MyListEditView(LoginRequiredMixin, UpdateView):  # マイリストを編�
         mylist = form.save()
         self.success_url = reverse_lazy(
             "records:mylist_detail", kwargs={"pk": mylist.id})
-        tags_add(mylist, "description")
+        add_tags(mylist, "description")
         messages.success(self.request, "リストを編集しました")
         return redirect(self.success_url)
 
