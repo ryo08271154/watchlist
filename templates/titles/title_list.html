@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{%block title%}タイトル一覧{%endblock%}
+{% block title %}タイトル一覧{% endblock %}
 {% block head %}
     <style>
         .title-container {
@@ -11,27 +11,41 @@
             border: 1px solid #ccc;
         }
     </style>
-{%endblock%}
-{%block content%}
+{% endblock %}
+{% block content %}
     <ul>
-        <li><a href="{% url 'titles:title_create'%}">タイトル追加</a></li>
-        <li><a href="{% url 'titles:title_import_external'%}">タイトルを外部サイトから追加</a></li>
-        <li><a href="{%url 'titles:watch_schedule'%}">視聴スケジュール</a></li></a></li>
+        <li><a href="{% url 'titles:title_create' %}">タイトル追加</a></li>
+        <li><a href="{% url 'titles:title_import_external' %}">タイトルを外部サイトから追加</a></li>
+        <li><a href="{% url 'titles:watch_schedule' %}">視聴スケジュール</a></li>
     </ul>
+    <form method="get" action="">
+        <label for="sort">並び替え:</label>
+        <select name="sort" id="sort" onchange="this.form.submit()">
+            <option value="">デフォルト</option>
+            <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>タイトル順（昇順）</option>
+            <option value="-title" {% if request.GET.sort == '-title' %}selected{% endif %}>タイトル順（降順）</option>
+            <option value="air_date" {% if request.GET.sort == 'air_date' %}selected{% endif %}>放送日（昇順）</option>
+            <option value="-air_date" {% if request.GET.sort == '-air_date' %}selected{% endif %}>放送日（降順）</option>
+            <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>作成日（昇順）</option>
+            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>作成日（降順）</option>
+            <option value="updated_at" {% if request.GET.sort == 'updated_at' %}selected{% endif %}>更新日（昇順）</option>
+            <option value="-updated_at" {% if request.GET.sort == '-updated_at' %}selected{% endif %}>更新日（降順）</option>
+        </select>
+    </form>
     <div class="title-section">
         <h2>タイトル</h2>
-        <p>{{titles.count}}件</p>
+        <p>{{ object_list.count }}件</p>
         <div class="title-container">
-        {%if titles%}
-            {% for item in titles%}
-            <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
-                <h3>{{item.title}}</h3>
-                <p>{{item.content_without_url|safe|linebreaksbr}}</p>
-            </a>
-            {% endfor %}
-        {%else%}
-            <h3>見つかりませんでした</h3>
-        {%endif%}
+            {% if object_list %}
+                {% for item in object_list %}
+                    <a href="{% url 'titles:title_detail' item.id %}" class="title-item">
+                        <h3>{{ item.title }}</h3>
+                        <p>{{ item.content_without_url|safe|linebreaksbr }}</p>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <h3>見つかりませんでした</h3>
+            {% endif %}
         </div>
     </div>
-{%endblock%}
+{% endblock %}

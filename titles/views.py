@@ -10,7 +10,7 @@ from django.db.models import ManyToOneRel, ManyToManyRel, UUIDField, ManyToManyF
 from .models import Title, Episode, Tag, Genre, SubGenre
 from .forms import TitleForm, EpisodeForm, TitleFileImportForm, EpisodeFileImportForm, SourceSelectForm, SourceSearchForm
 from .utils.embed import generate_embed_html
-from .utils.extension import get_extension_download_url
+from .utils.extension import get_extension_download_url, get_extension_assets
 
 import csv
 import io
@@ -56,7 +56,7 @@ class BaseExportView(LoginRequiredMixin, View):
         return response
 
 
-def related_titles_add(title):
+def add_related_titles(title):
     related_titles = Title.objects.filter(title__icontains=title.title).exclude(
         id=title.id).exclude(id__in=title.related_titles.all())
     if related_titles.exists():
@@ -67,7 +67,7 @@ def related_titles_add(title):
     return title.related_titles.all()
 
 
-def tags_add(title, field):
+def add_tags(title, field):
     tags = []
     tags_name = re.findall(r"#\S+", getattr(title, field))  # コメントからタグを抽出する
     if tags_name:
@@ -82,7 +82,7 @@ def tags_add(title, field):
     return tags
 
 
-def tags_auto_add(title):
+def add_seasonal_tags_to_title(title):
     tags = []
     tags_name = []
     # 時期を追加
@@ -107,7 +107,7 @@ def tags_auto_add(title):
     return tags
 
 
-def csv_file_read(request_file):
+def read_csv_file(request_file):
     file = io.StringIO(request_file.read().decode("shift-jis"))
     return csv.reader(file)
 
@@ -117,10 +117,24 @@ class TitleListView(LoginRequiredMixin, ListView):  # 全タイトル表示
     content_object_name = "titles"
     template_name = "titles/title_list.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["titles"] = Title.objects.all()
-        return context
+    ALLOWED_SORTS = {
+        "title": "title_kana",
+        "-title": "-title_kana",
+        "-air_date": "-air_date",
+        "air_date": "air_date",
+        "created_at": "created_at",
+        "-created_at": "-created_at",
+        "updated_at": "updated_at",
+        "-updated_at": "-updated_at",
+    }
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        sort = self.request.GET.get("sort")
+
+        if sort in self.ALLOWED_SORTS:
+            queryset = queryset.order_by(self.ALLOWED_SORTS[sort])
+        return queryset
 
 
 class TitleDetailView(LoginRequiredMixin, DetailView):  # タイトル詳細表示
@@ -142,9 +156,9 @@ class TitleCreateView(LoginRequiredMixin, CreateView):  # タイトル追加
 
     def form_valid(self, form):
         title = form.save()
-        tags_add(title, "content")
-        tags_auto_add(title)
-        related_titles_add(title)
+        add_tags(title, "content")
+        add_seasonal_tags_to_title(title)
+        add_related_titles(title)
         self.success_url = reverse_lazy(
             "titles:title_detail", kwargs={"pk": title.id})
         return redirect(self.success_url)
@@ -157,9 +171,9 @@ class TitleEditView(LoginRequiredMixin, UpdateView):  # タイトル編集
 
     def form_valid(self, form):
         title = form.save()
-        tags_add(title, "content")
-        tags_auto_add(title)
-        related_titles_add(title)
+        add_tags(title, "content")
+        add_seasonal_tags_to_title(title)
+        add_related_titles(title)
         self.success_url = reverse_lazy(
             "titles:title_detail", kwargs={"pk": title.id})
         return redirect(self.success_url)
@@ -182,7 +196,7 @@ class TitleImportView(LoginRequiredMixin, FormView):  # タイトルをファイ
         website_column = form.cleaned_data["website_column"]-1
         count = 0
         try:
-            reader = csv_file_read(self.request.FILES["file"])
+            reader = read_csv_file(self.request.FILES["file"])
         except Exception as e:
             messages.error(self.request, f"ファイルの読み込みに失敗しました")
             return super().form_invalid(form)
@@ -217,8 +231,8 @@ class TitleImportView(LoginRequiredMixin, FormView):  # タイトルをファイ
         for title, sub_genre in zip(titles, sub_genres):
             if sub_genre:
                 title.sub_genre.add(sub_genre)
-            related_titles_add(title)
-            tags_auto_add(title)
+            add_related_titles(title)
+            add_seasonal_tags_to_title(title)
         return redirect(self.success_url)
 
 
@@ -251,7 +265,7 @@ class TitleEpisodeCreateView(LoginRequiredMixin, CreateView):  # エピソード
         episode = form.save(commit=False)
         episode.title = get_object_or_404(Title, id=self.kwargs["pk"])
         episode.save()
-        tags_add(episode, "content")
+        add_tags(episode, "content")
         episode.tags.add(*episode.title.tags.all())
         self.success_url = reverse_lazy(
             "titles:episode_detail", kwargs={"pk": episode.id})
@@ -271,7 +285,7 @@ class EpisodeEditView(LoginRequiredMixin, UpdateView):  # エピソード編集
 
     def form_valid(self, form):
         episode = form.save()
-        tags_add(episode, "content")
+        add_tags(episode, "content")
         episode.tags.add(*episode.title.tags.all())
         self.success_url = reverse_lazy(
             "titles:episode_detail", kwargs={"pk": episode.id})
@@ -293,7 +307,7 @@ class EpisodeImportView(LoginRequiredMixin, FormView):  # エピソードをフ�
         duration_column = form.cleaned_data["duration_column"]-1
         count = 0
         try:
-            reader = csv_file_read(self.request.FILES["file"])
+            reader = read_csv_file(self.request.FILES["file"])
         except Exception as e:
             messages.error(self.request, f"ファイルの読み込みに失敗しました")
             return super().form_invalid(form)
@@ -407,7 +421,7 @@ class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトか
             for related_title in title.related_titles.all():
                 title.related_titles.add(*related_title.related_titles.all().exclude(
                     id=title.id).exclude(id__in=title.related_titles.all()))
-            tags_auto_add(title)
+            add_seasonal_tags_to_title(title)
         messages.success(self.request, f"{len(titles)}件のタイトルを追加しました")
         return redirect(self.success_url)
 
@@ -553,5 +567,10 @@ class ExtensionInfoView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["download_url"] = get_extension_download_url()
+        user_agent = self.request.META.get("HTTP_USER_AGENT", "").lower()
+        if "chrome" in user_agent:
+            context["download_url"] = get_extension_download_url()
+        elif "firefox" in user_agent:
+            context["download_url"] = get_extension_assets(
+                "xpi").get("browser_download_url")
         return context
