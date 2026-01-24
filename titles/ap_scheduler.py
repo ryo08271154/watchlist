@@ -18,9 +18,10 @@ def update_weekly_episodes():
 
 def start():
     scheduler = BackgroundScheduler()
+    hour = random.randint(0, 4)
     minute = random.randint(1, 59)
-    scheduler.add_job(update_episodes, "interval",
-                      days=1, id="update_episodes")
+    scheduler.add_job(update_episodes, "cron", hour=hour,
+                      minute=minute, id="update_episodes")
     scheduler.add_job(update_weekly_episodes, "cron", day_of_week="mon",
                       hour=3, minute=minute, id="update_weekly_episodes")
     scheduler.start()
