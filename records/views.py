@@ -7,7 +7,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import WatchRecord, EpisodeWatchRecord, MyList, WatchMethod
 from .forms import ReviewForm, EpisodeReviewForm, MyListForm, ReviewFileImportForm, ExportForm, MyListAddTitleForm
 from titles.models import Title, Genre, SubGenre, Tag, Episode
-from titles.views import BaseExportView, read_csv_file, add_tags
+from titles.views import BaseExportView, add_tags
+from titles.utils.file_helpers import read_csv_file
 from django.db.models import Q, Sum
 from django.utils import timezone
 from .utils.topic import watched_date_month_topic, watched_date_year_topic, tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic, today_episode_topic, recommended_topic

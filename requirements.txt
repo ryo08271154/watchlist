@@ -4,3 +4,4 @@ matplotlib
 python-dateutil
 requests
 urllib3
+apscheduler

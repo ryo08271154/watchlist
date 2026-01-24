@@ -11,7 +11,8 @@ from .models import Title, Episode, Tag, Genre, SubGenre
 from .forms import TitleForm, EpisodeForm, TitleFileImportForm, EpisodeFileImportForm, SourceSelectForm, SourceSearchForm
 from .utils.embed import generate_embed_html
 from .utils.extension import get_extension_download_url, get_extension_assets
-
+from .utils.file_helpers import read_csv_file
+from .services.syoboi_calendar import search_syoboi_calendar_titles, get_syoboi_calendar_title, get_syoboi_calendar_episodes, import_syoboi_titles, create_and_update_episodes
 import csv
 import io
 
@@ -105,11 +106,6 @@ def add_seasonal_tags_to_title(title):
         tags.append(tag)
     title.tags.add(*tags)
     return tags
-
-
-def read_csv_file(request_file):
-    file = io.StringIO(request_file.read().decode("shift-jis"))
-    return csv.reader(file)
 
 
 class TitleListView(LoginRequiredMixin, ListView):  # 全タイトル表示
@@ -339,23 +335,6 @@ class EpisodeImportView(LoginRequiredMixin, FormView):  # エピソードをフ�
         return context
 
 
-def syoboi_calender_title_search(title_name):
-    r = requests.get(
-        f"https://cal.syoboi.jp/json.php?Req=TitleSearch&Search={title_name}&Limit=15")
-    result = r.json()["Titles"]
-    if result is None:
-        return []
-    return list(result.values())
-
-
-def syoboi_calender_title_get(tid):
-    r = requests.get(f"https://cal.syoboi.jp/json.php?Req=TitleFull&TID={tid}")
-    result = r.json()["Titles"]
-    if result is None:
-        return []
-    return list(result.values())
-
-
 class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトからタイトルを取得して追加する
     form_class = SourceSearchForm
     template_name = "titles/search_form.html"
@@ -365,8 +344,8 @@ class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトか
         form = super().get_form(form_class)
         if self.request.session.get("search_choices") and self.request.session.get("search_q") == self.request.GET.get("q"):  # 保存したのを使う
             form.fields["titles"].choices = self.request.session["search_choices"]
-        elif self.request.GET.get("source") == "syoboi_calender" and self.request.method == "GET" and self.request.GET.get("q"):  # 検索して保存しておく
-            search_result = syoboi_calender_title_search(
+        elif self.request.GET.get("source") == "syoboi_calendar" and self.request.method == "GET" and self.request.GET.get("q"):  # 検索して保存しておく
+            search_result = search_syoboi_calendar_titles(
                 self.request.GET.get("q"))
             form.fields["titles"].choices = [
                 (title["TID"], title["Title"]) for title in search_result]
@@ -376,42 +355,9 @@ class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトか
 
     def form_valid(self, form):
         titles = []
-        if self.request.GET.get("source") == "syoboi_calender":
-            GENRE_ID = {"1": "アニメ", "2": "ラジオ", "3": "テレビ", "4": "特撮",
-                        "5": "アニメ関連番組", "7": "アニメOVA", "8": "映画", "9": "アニメ", "10": "アニメ"}
-            selected_titles_id = form.cleaned_data["titles"]
-            search_titles = syoboi_calender_title_get(
-                ",".join("".join(str(i)) for i in selected_titles_id))
-            for search_title in search_titles:
-                title_name = search_title["Title"]
-                genre, created = Genre.objects.get_or_create(
-                    name=GENRE_ID[search_title["Cat"]])
-                season = re.search(r"(\d+)", search_title["ShortTitle"])
-                air_date = datetime.date(
-                    int(search_title["FirstYear"]), int(search_title["FirstMonth"]), 1)
-                website = re.search(
-                    r'\[\[公式\s+(\S+)\]\]', search_title["Comment"])
-                media_urls = re.findall(
-                    r'\[\[(|Twitter.*?|X.*?|YouTube.*?|ニコニコ.*?)\s+(\S+)\]\]', search_title["Comment"])
-                tid = search_title["TID"]
-                title_search = Title.objects.filter(title=search_title["Title"], season=int(
-                    season.group()) if season else 1)  # 同じのが登録されてないか探す
-                if title_search.count() >= 1:
-                    messages.error(
-                        self.request, f"すでにタイトルが登録されているため追加しませんでした：{title_name}")
-                    continue
-                elif title_search.count() == 0:
-                    title = Title(
-                        title=title_name,
-                        title_kana=search_title["TitleYomi"],
-                        content="\n".join(url for name, url in media_urls),
-                        genre=genre,
-                        season=int(season.group()) if season else 1,
-                        air_date=air_date,
-                        website=website.group(1) if website else "",
-                        source_website=f"https://cal.syoboi.jp/tid/{tid}"
-                    )
-                    titles.append(title)
+        if self.request.GET.get("source") == "syoboi_calendar":
+            titles = import_syoboi_titles(
+                self.request, form.cleaned_data["titles"])
         Title.objects.bulk_create(titles)
         for title in titles:
             related_titles = Title.objects.filter(
@@ -431,60 +377,6 @@ class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトか
         return context
 
 
-def syoboi_calender_episode_get(title, selected_titles_id, title_episodes):
-    tid = ",".join("".join(str(i)) for i in selected_titles_id)
-    # for tid in selected_tid:
-    r = requests.get(
-        f"https://cal.syoboi.jp/db.php/db?Command=ProgLookup&TID={tid}&JOIN=SubTitles")
-    root = ET.fromstring(r.text)
-    items = sorted(root.findall(".//ProgItem"),
-                   key=lambda x: int(x.find("TID").text))  # タイトルidで並べ替え
-    items = sorted(root.findall(".//ProgItem"), key=lambda x: datetime.datetime.strptime(
-        x.find("StTime").text, "%Y-%m-%d %H:%M:%S"))  # 放送開始時間順に並べ替え
-    target_count = int(sorted(root.findall(".//ProgItem"), key=lambda x: int(
-        x.find("Count").text or 999))[0].find("Count").text)  # 最小の回数を求める
-    episodes = []
-    update_episodes = []
-    while True:
-        for item in items:
-            item_count = int(item.find("Count").text or 0)
-            # 削除されているのと再放送は追加しない
-            if target_count == item_count and int(item.find("Deleted").text) == 0 and int(item.find("Flag").text) != 8:
-                start_time = datetime.datetime.strptime(
-                    item.find("StTime").text, "%Y-%m-%d %H:%M:%S")
-                end_time = datetime.datetime.strptime(
-                    item.find("EdTime").text, "%Y-%m-%d %H:%M:%S")
-                duration = end_time-start_time
-                minutes = int(duration.total_seconds()//60)
-                episode_number = int(item.find("Count").text)
-                pid = item.find("PID").text
-                episode_search = title_episodes.filter(
-                    episode_number=episode_number)  # 同じのが登録されてないか探す
-                if episode_search.count() >= 1 and episode_search.first().episode_title == "" and item.find("STSubTitle").text:
-                    # 同じのが登録されていてエピソードタイトルが登録されていない場合登録する
-                    episode = episode_search.first()
-                    episode.episode_title = item.find("STSubTitle").text
-                    episode.air_date = timezone.make_aware(start_time)
-                    episode.source_website = f"https://cal.syoboi.jp/tid/{tid}/time#{pid}"
-                    update_episodes.append(episode)
-                elif episode_search.count() == 0:  # 何も登録されていない場合
-                    episode = Episode(
-                        title=title,
-                        episode_title=item.find("STSubTitle").text or "",
-                        episode_number=episode_number,
-                        content="",
-                        air_date=timezone.make_aware(start_time),
-                        duration=minutes,
-                        source_website=f"https://cal.syoboi.jp/tid/{tid}/time#{pid}"
-                    )
-                    episodes.append(episode)
-                target_count = item_count+1
-                break
-        else:
-            break
-    return episodes, update_episodes
-
-
 # 外部サイトからエピソードを取得して追加する
 class TitleEpisodeSourceImportView(LoginRequiredMixin, FormView):
     form_class = SourceSearchForm
@@ -494,8 +386,8 @@ class TitleEpisodeSourceImportView(LoginRequiredMixin, FormView):
         form = super().get_form(form_class)
         if self.request.session.get("search_choices") and self.request.session.get("search_q") == self.request.GET.get("q"):  # 保存したのを使う
             form.fields["titles"].choices = self.request.session["search_choices"]
-        elif self.request.GET.get("source") == "syoboi_calender" and self.request.method == "GET" and self.request.GET.get("q"):  # 検索して保存しておく
-            search_result = syoboi_calender_title_search(
+        elif self.request.GET.get("source") == "syoboi_calendar" and self.request.method == "GET" and self.request.GET.get("q"):  # 検索して保存しておく
+            search_result = search_syoboi_calendar_titles(
                 self.request.GET.get("q"))
             form.fields["titles"].choices = [
                 (title["TID"], title["Title"]) for title in search_result]
@@ -503,25 +395,21 @@ class TitleEpisodeSourceImportView(LoginRequiredMixin, FormView):
             self.request.session["search_q"] = self.request.GET.get("q")
         return form
 
+    def _create_and_update_episodes(self, episodes, update_episodes):
+        create_and_update_episodes(episodes, update_episodes)
+        messages.warning(
+            self.request, f"{len(update_episodes)}件のエピソードを更新しました")
+        messages.success(self.request, f"{len(episodes)}件のエピソードを追加しました")
+
     def form_valid(self, form):
         selected_titles_id = form.cleaned_data["titles"]
         title = Title.objects.get(id=self.kwargs["pk"])
-        title_episodes = Episode.objects.filter(
-            title=title).order_by("episode_number")
         self.success_url = reverse_lazy(
             "titles:title_episodes", kwargs={"pk": title.id})
-        if self.request.GET.get("source") == "syoboi_calender":
-            episodes, update_episodes = syoboi_calender_episode_get(
-                title, selected_titles_id, title_episodes)
-        Episode.objects.bulk_create(episodes)
-        for episode in episodes:
-            episode.tags.add(*episode.title.tags.all())
-        if update_episodes:
-            Episode.objects.bulk_update(
-                update_episodes, ["episode_title", "air_date", "source_website"])
-            messages.warning(
-                self.request, f"{len(update_episodes)}件のエピソードを更新しました")
-        messages.success(self.request, f"{len(episodes)}件のエピソードを追加しました")
+        if self.request.GET.get("source") == "syoboi_calendar":
+            episodes, update_episodes = get_syoboi_calendar_episodes(
+                title, selected_titles_id)
+        self._create_and_update_episodes(episodes, update_episodes)
         return redirect(self.success_url)
 
     def get_context_data(self, **kwargs):
