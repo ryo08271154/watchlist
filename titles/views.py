@@ -427,19 +427,25 @@ class MyWatchScheduleView(LoginRequiredMixin, View):
     def get(self, request):
         queryset = []
         days = []
-        for day in range(8):
-            start_time = datetime.datetime.now().replace(hour=0, minute=0, second=0,
-                                                         microsecond=0)+datetime.timedelta(days=day)
+        start_datetime = datetime.datetime.now()
+        if request.GET.get("start_date"):
+            try:
+                start_datetime = datetime.datetime.strptime(
+                    request.GET.get("start_date"), "%Y-%m-%d")
+            except ValueError:
+                messages.error(request, "日付の形式が正しくありません")
+
+        for day in range(7):
+            start_time = start_datetime.replace(hour=0, minute=0, second=0,
+                                                microsecond=0)+datetime.timedelta(days=day)
             end_time = start_time + \
                 datetime.timedelta(hours=23, minutes=59, seconds=59)
             queryset.append(Episode.objects.filter(air_date__range=[timezone.make_aware(
                 start_time), timezone.make_aware(end_time)]).order_by("air_date"))
             days.append(start_time)
         data = zip(queryset, days)
-        today = datetime.datetime.now()
-        last_week = datetime.datetime.now()-datetime.timedelta(days=7)
-        next_week = datetime.datetime.now()+datetime.timedelta(days=7)
-        return render(request, "titles/watch_schedule.html", {"data": data, "today": today, "last_week": last_week, "next_week": next_week})
+        today_date = datetime.date.today()
+        return render(request, "titles/watch_schedule.html", {"data": data, "today_date": today_date})
 
 
 class TitleExportView(BaseExportView):

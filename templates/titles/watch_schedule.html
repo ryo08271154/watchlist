@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block title %}視聴スケジュール{% endblock %}
 {% block head %}
     <style>
         .title-container {
@@ -11,9 +12,28 @@
             scroll-behavior: smooth;
             min-height: 100px;
         }
+        #week-controls {
+            display: flex;
+            justify-content: center; /* 横方向中央 */
+            align-items: center; /* 縦方向中央 */
+        }
     </style>
 {% endblock %}
 {% block content %}
+    <form method="get" id="date-form">
+        <label for="start-date">開始日時:</label>
+        <input
+            type="date"
+            name="start_date"
+            id="start-date"
+            onchange="this.form.submit()"
+            value="{% if request.GET.start_date %}{{ request.GET.start_date }}{% else %}{{ today_date|date:'Y-m-d' }}{% endif %}"
+        />
+        <div id="week-controls">
+            <button type="button" id="prev-week-btn" onclick="addWeek(-1)">前の週</button>
+            <button type="button" id="next-week-btn" onclick="addWeek(1)">次の週</button>
+        </div>
+    </form>
     {% for day_episodes , day in data %}
         <div class="title-section">
             <h2>{{ day|date:"m月d日 (D)" }}</h2>
@@ -36,4 +56,30 @@
             </div>
         </div>
     {% endfor %}
+    <form method="get">
+        <div id="week-controls">
+            <button type="button" id="prev-week-btn" onclick="addWeek(-1)">前の週</button>
+            <button type="button" id="next-week-btn" onclick="addWeek(1)">次の週</button>
+        </div>
+    </form>
+{% endblock %}
+{% block scripts %}
+    <script>
+        function addDays(date, n) {
+            const dt = new Date(date);
+            dt.setDate(dt.getDate() + n);
+            return dt;
+        }
+        function addWeek(week = 1) {
+            const form = document.getElementById("date-form");
+            const startDate = document.getElementById("start-date");
+            let baseDate = new Date(startDate.value);
+            if (isNaN(baseDate)) {
+                baseDate = new Date();
+            }
+            const current = addDays(baseDate, 7 * week);
+            startDate.valueAsDate = current;
+            form.submit();
+        }
+    </script>
 {% endblock %}
