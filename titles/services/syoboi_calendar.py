@@ -172,7 +172,8 @@ def get_program_items_by_pid(pid):
 
 def auto_update_episodes(start_date: datetime.date = None, end_date: datetime.date = None):
     if not start_date:
-        start_date = timezone.now().date() - datetime.timedelta(days=1)  # 前日から
+        start_date = timezone.localtime(
+            timezone.now()).date() - datetime.timedelta(days=1)  # 前日から
     if not end_date:
         end_date = start_date + datetime.timedelta(days=1)  # 翌日まで
     target_episodes = Episode.objects.filter(air_date__date__range=(
