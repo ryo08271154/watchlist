@@ -52,7 +52,7 @@ class EpisodeFileImportForm(forms.Form):
 
 class SourceSelectForm(forms.Form):
     SOURCE_CHOICES = [
-        ("syoboi_calender", "しょぼいカレンダー")
+        ("syoboi_calendar", "しょぼいカレンダー")
     ]
     q = forms.CharField(label="タイトル")
     source = forms.ChoiceField(choices=SOURCE_CHOICES, label="ソース")
