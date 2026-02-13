@@ -8,13 +8,18 @@ from django.utils import timezone
 from django.contrib import messages
 
 
-def search_syoboi_calendar_titles(title_name):
+def search_syoboi_calendar_titles(title_name, request=None):
     try:
         r = requests.get(
             f"https://cal.syoboi.jp/json.php?Req=TitleSearch&Search={title_name}&Limit=15")
-    except:
+    except Exception as e:
+        if request:
+            messages.error(request, f"しょぼいカレンダーに接続できませんでした。({e})")
         return []
     if r.status_code != 200:
+        if request:
+            messages.error(
+                request, f"しょぼいカレンダーの応答が異常です。 時間をおいて再度お試しください。 ({r.status_code})")
         return []
     result = r.json()["Titles"]
     if result is None:
@@ -22,13 +27,18 @@ def search_syoboi_calendar_titles(title_name):
     return list(result.values())
 
 
-def get_syoboi_calendar_title(tid):
+def get_syoboi_calendar_title(tid, request=None):
     try:
         r = requests.get(
             f"https://cal.syoboi.jp/json.php?Req=TitleFull&TID={tid}")
-    except:
+    except Exception as e:
+        if request:
+            messages.error(request, f"しょぼいカレンダーに接続できませんでした。({e})")
         return []
     if r.status_code != 200:
+        if request:
+            messages.error(
+                request, f"しょぼいカレンダーの応答が異常です。 時間をおいて再度お試しください。 ({r.status_code})")
         return []
     result = r.json()["Titles"]
     if result is None:
@@ -41,7 +51,7 @@ def import_syoboi_titles(request, selected_titles_id):
     GENRE_ID = {"1": "アニメ", "2": "ラジオ", "3": "テレビ", "4": "特撮",
                 "5": "アニメ関連番組", "7": "アニメOVA", "8": "映画", "9": "アニメ", "10": "アニメ"}
     search_titles = get_syoboi_calendar_title(
-        ",".join("".join(str(i)) for i in selected_titles_id))
+        ",".join("".join(str(i)) for i in selected_titles_id), request)
     for search_title in search_titles:
         title_name = search_title["Title"]
         genre, created = Genre.objects.get_or_create(
@@ -130,16 +140,21 @@ def parse_and_sort_program_items(root):
     return items, min_count
 
 
-def get_syoboi_calendar_episodes(title, selected_titles_id):
+def get_syoboi_calendar_episodes(title, selected_titles_id, request=None):
 
     tid = ",".join("".join(str(i)) for i in selected_titles_id)
     # for tid in selected_tid:
     try:
         r = requests.get(
             f"https://cal.syoboi.jp/db.php/db?Command=ProgLookup&TID={tid}&JOIN=SubTitles")
-    except:
+    except Exception as e:
+        if request:
+            messages.error(request, f"しょぼいカレンダーに接続できませんでした。({e})")
         return [], []
     if r.status_code != 200:
+        if request:
+            messages.error(
+                request, f"しょぼいカレンダーの応答が異常です。 時間をおいて再度お試しください。 ({r.status_code})")
         return [], []
     root = ET.fromstring(r.text)
     items, min_count = parse_and_sort_program_items(root)

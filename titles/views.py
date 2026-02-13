@@ -346,7 +346,7 @@ class TitleSourceImportView(LoginRequiredMixin, FormView):  # 外部サイトか
             form.fields["titles"].choices = self.request.session["search_choices"]
         elif self.request.GET.get("source") == "syoboi_calendar" and self.request.method == "GET" and self.request.GET.get("q"):  # 検索して保存しておく
             search_result = search_syoboi_calendar_titles(
-                self.request.GET.get("q"))
+                self.request.GET.get("q"), self.request)
             form.fields["titles"].choices = [
                 (title["TID"], title["Title"]) for title in search_result]
             self.request.session["search_choices"] = form.fields["titles"].choices
@@ -388,7 +388,7 @@ class TitleEpisodeSourceImportView(LoginRequiredMixin, FormView):
             form.fields["titles"].choices = self.request.session["search_choices"]
         elif self.request.GET.get("source") == "syoboi_calendar" and self.request.method == "GET" and self.request.GET.get("q"):  # 検索して保存しておく
             search_result = search_syoboi_calendar_titles(
-                self.request.GET.get("q"))
+                self.request.GET.get("q"), self.request)
             form.fields["titles"].choices = [
                 (title["TID"], title["Title"]) for title in search_result]
             self.request.session["search_choices"] = form.fields["titles"].choices
@@ -408,7 +408,7 @@ class TitleEpisodeSourceImportView(LoginRequiredMixin, FormView):
             "titles:title_episodes", kwargs={"pk": title.id})
         if self.request.GET.get("source") == "syoboi_calendar":
             episodes, update_episodes = get_syoboi_calendar_episodes(
-                title, selected_titles_id)
+                title, selected_titles_id, self.request)
         self._create_and_update_episodes(episodes, update_episodes)
         return redirect(self.success_url)
 
