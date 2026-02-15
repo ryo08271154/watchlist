@@ -20,13 +20,11 @@
                 background-color: #fafbfc;
                 margin: 0;
                 padding: 0;
-                padding-top: 200px;
             }
 
             header {
                 min-height: 150px;
-                max-height: 200px;
-                position: fixed;
+                position: sticky;
                 top: 0;
                 left: 0;
                 right: 0;
@@ -575,50 +573,53 @@
     </head>
 
     <body>
-        <header>
-            <h1><a href="{% url 'records:index' %}">視聴記録</a></h1>
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            <div class="top-bar">
-                <form action="{% url 'records:search' %}" autocomplete="off" method="get">
-                    <label for="title">検索</label>
-                    <input type="search" id="title" name="q" placeholder="検索語句を入力" />
-                    <button type="submit">検索</button>
-                </form>
-                <nav class="nav-list">
-                    <ul>
-                        <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
-                        <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
-                        <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
-                        <li><a href="#" id="openMenu">メニュー</a></li>
+        {% if not request.GET.topbar %}
+            <header>
+                <h1><a href="{% url 'records:index' %}">視聴記録</a></h1>
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
                     </ul>
-                </nav>
-                <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
-                    {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
-                        {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
-                    ><button type="submit" id="logout">ログアウト</button>
-                </form>
-            </div>
-            <dialog id="menu">
-                <ul>
-                    <li><a href="{% url 'records:mylist' %}">マイリスト</a></li>
-                    <li>
-                        <a href="{% url 'titles:watch_schedule' %}">視聴スケジュール</a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/ryo08271154/watchlist" target="_blank">ソースコード</a>
-                    </li>
-                    <li><a href="{% url 'titles:extension' %}">拡張機能</a></li>
-                </ul>
-                <button id="closeMenu">閉じる</button>
-            </dialog>
-        </header>
-        {% block content %}{% endblock %}
+                {% endif %}
+                <div class="top-bar">
+                    <form action="{% url 'records:search' %}" autocomplete="off" method="get">
+                        <label for="title">検索</label>
+                        <input type="search" id="title" name="q" placeholder="検索語句を入力" />
+                        <button type="submit">検索</button>
+                    </form>
+                    <nav class="nav-list">
+                        <ul>
+                            <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
+                            <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
+                            <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
+                            <li><a href="#" id="openMenu">メニュー</a></li>
+                        </ul>
+                    </nav>
+                    <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
+                        {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
+                            {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
+                        ><button type="submit" id="logout">ログアウト</button>
+                    </form>
+                </div>
+                <dialog id="menu">
+                    <ul>
+                        <li><a href="{% url 'records:mylist' %}">マイリスト</a></li>
+                        <li>
+                            <a href="{% url 'titles:watch_schedule' %}">視聴スケジュール</a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/ryo08271154/watchlist" target="_blank">ソースコード</a>
+                        </li>
+                        <li><a href="{% url 'titles:extension' %}">拡張機能</a></li>
+                    </ul>
+                    <button id="closeMenu">閉じる</button>
+                </dialog>
+            </header>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
         <script>
             const openMenu = document.getElementById("openMenu");
             const menu = document.getElementById("menu");

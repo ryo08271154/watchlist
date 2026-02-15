@@ -9,7 +9,7 @@ from .forms import ReviewForm, EpisodeReviewForm, MyListForm, ReviewFileImportFo
 from titles.models import Title, Genre, SubGenre, Tag, Episode
 from titles.views import BaseExportView, add_tags
 from titles.utils.file_helpers import read_csv_file
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Exists, OuterRef
 from django.utils import timezone
 from .utils.topic import watched_date_month_topic, watched_date_year_topic, tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic, today_episode_topic, recommended_topic
 from .utils.extractor import TitleExtractor, EpisodeExtractor
@@ -25,6 +25,8 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import base64
 import dateutil.relativedelta as relativedelta
+
+from urllib.parse import quote
 
 
 def create_graph(x=[], y=[], x_label="", y_label="", title="", figsize=(8, 6), locator=ticker.MultipleLocator(1)):
@@ -848,4 +850,26 @@ class AddFromShareView(LoginRequiredMixin, TemplateView, TitleExtractor, Episode
         if matched_data:
             context["title"] = matched_data["title"]
             context["episode"] = matched_data["episode"]
+        return context
+
+
+class WatchMethodListView(LoginRequiredMixin, DetailView):
+    model = Title
+    template_name = "records/watch_method_list.html"
+    context_object_name = "title"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        encoded = quote(self.object.title)
+        used_methods = WatchMethod.objects.filter(
+            Exists(WatchRecord.objects.filter(
+                title=self.object, watch_method=OuterRef("pk")))
+        )
+
+        watch_methods = []
+        for wm in used_methods:
+            if wm.search_url:
+                url = wm.search_url.replace("{query}", encoded)
+                watch_methods.append({"name": wm.name, "url": url})
+        context["watch_methods"] = watch_methods
         return context

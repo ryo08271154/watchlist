@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}{{ title.title }} 視聴方法{% endblock %}
+{% block content %}
+    <h1>視聴方法を選択</h1>
+    <p>このタイトルは以下の方法で視聴できます。</p>
+    <p>視聴方法を選択してください。外部サイトに移動します。</p>
+    <p>{{ watch_methods|length }} 件</p>
+    <ul id="wm-list">
+        {% for wm in watch_methods %}
+            <li id="{{ wm.name }}" class="wm-item" data-name="{{ wm.name }}" data-url="{{ wm.url }}">
+                <a class="wm-link" href="{{ wm.url }}" target="_blank" rel="noopener noreferrer" title="{{ wm.url }}">{{ wm.name }}</a>
+            </li>
+            {% empty %}
+            <li><p>視聴方法が登録されていません。</p></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
