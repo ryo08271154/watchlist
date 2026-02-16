@@ -24,3 +24,12 @@
         {% endfor %}
     </ul>
 {% endblock %}
+{% block scripts %}
+    {% if watch_record.is_spoiler %}
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                confirm("このエピソードレビューにはネタバレが含まれている可能性があります。表示しますか？") || history.back();
+            });
+        </script>
+    {% endif %}
+{% endblock %}
