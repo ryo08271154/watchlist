@@ -7,7 +7,7 @@ class ReviewForm(ModelForm):
     class Meta:
         model = WatchRecord
         fields = ["comment_title", "comment", "watched_date",
-                  "rating", "status", "watch_method", "tags"]
+                  "rating", "is_spoiler", "status", "watch_method", "tags"]
         widgets = {"watched_date": forms.DateInput(attrs={"type": "date"})}
 
 
@@ -15,7 +15,7 @@ class EpisodeReviewForm(ModelForm):
     class Meta:
         model = EpisodeWatchRecord
         fields = ["comment_title", "comment", "watched_date",
-                  "rating", "status", "watch_method", "tags"]
+                  "rating", "is_spoiler", "status", "watch_method", "tags"]
         widgets = {"watched_date": forms.DateInput(attrs={"type": "date"})}
 
 

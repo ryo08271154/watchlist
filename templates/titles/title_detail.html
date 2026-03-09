@@ -25,9 +25,8 @@
         <p>ソース：<a href="{{ title.source_website }}" target="_blank" rel="noopener noreferrer">{{ title.source_website_name }}</a></p>
     {% endif %}
     <ul>
-        <li>
-            <a href="{% url 'records:add_mylist' title.id %}">マイリストに追加</a>
-        </li>
+        <li><a href="{% url 'records:add_mylist' title.id %}">マイリストに追加</a></li>
+        <li><a href="{% url 'records:watch_method' title.id %}">視聴する</a></li>
         <li><a href="{% url 'records:title_review_list' title.id %}">レビュー</a></li>
     </ul>
 

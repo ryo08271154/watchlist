@@ -9,6 +9,8 @@ urlpatterns = [
          name="title_review_list"),
     path("title/<uuid:pk>/review/new",
          views.ReviewCreateView.as_view(), name="title_review_create"),
+    path("title/<uuid:pk>/watch_method",
+         views.WatchMethodListView.as_view(), name="watch_method"),
     path("review/<uuid:pk>/edit", views.ReviewEditView.as_view(), name="review_edit"),
     path("episode/<uuid:pk>/review",
          views.EpisodeReviewListView.as_view(), name="episode_review_list"),
