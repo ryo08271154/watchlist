@@ -8,10 +8,11 @@
     <h2>{{ episode.duration }}分 | {{ episode.air_date }}</h2>
     <h3><a href="{% url 'titles:title_detail' episode.title.id %}">{{ episode.title }}</a></h3>
     <p>{{ episode.content }}</p>
-    {% if episode.source_website %}<p>
-        ソース：<a href="{{ episode.source_website }}" target="_blank" rel="noopener noreferrer">{{ episode.source_website_name }}</a>
-    </p>{% endif %}
+    {% if episode.source_website %}
+        <p>ソース：<a href="{{ episode.source_website }}" target="_blank" rel="noopener noreferrer">{{ episode.source_website_name }}</a></p>
+    {% endif %}
     <ul>
+        <li><a href="{% url 'records:watch_method' episode.title.id %}">視聴する</a></li>
         <li><a href="{% url 'records:episode_review_list' episode.id %}">レビュー</a></li>
     </ul>
     <h3>タグ</h3>

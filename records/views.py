@@ -671,7 +671,7 @@ class MyReviewListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         if self.request.GET.get("year"):
-            return super().get_queryset().filter(user=self.request.user, watched_date__year=self.request.GET.get("year"))
+            return super().get_queryset().filter(user=self.request.user, watched_date__year=self.request.GET.get("year")).order_by("-updated_at")
         else:
             now_year = datetime.date.today()
             last_year = now_year-relativedelta.relativedelta(years=1)
