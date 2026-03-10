@@ -11,7 +11,7 @@ from titles.views import BaseExportView, add_tags
 from titles.utils.file_helpers import read_csv_file
 from django.db.models import Q, Sum, Exists, OuterRef
 from django.utils import timezone
-from .utils.topic import watched_date_month_topic, watched_date_year_topic, tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic, today_episode_topic, recommended_topic
+from .utils.topic import watched_date_month_topic, watched_date_year_topic, tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic, today_episode_topic, recommended_topic, next_episode_topic
 from .utils.extractor import TitleExtractor, EpisodeExtractor
 
 import csv
@@ -116,6 +116,7 @@ class IndexView(LoginRequiredMixin, View):
         random_topic = 10  # ランダムに表示する数
         # 一番上固定
         topics.append(recommended_topic(request))
+        topics.append(next_episode_topic(request))
         topics.append(today_episode_topic(request))
         topics.append({"name": "視聴中", "description": "視聴中のタイトル", "items": Title.objects.filter(
             watchrecord__user=request.user, watchrecord__status="watching")})
@@ -143,7 +144,41 @@ class IndexView(LoginRequiredMixin, View):
             if topic["name"] in [i["name"] for i in topics]:  # 重複をさせないようにする
                 continue
             topics.append(topic)
-        return render(request, "records/index.html", {"topics": topics})
+        sections = []
+        for t in topics:
+            is_episode = t.get("type") == "episode"
+
+            if is_episode:
+                url_name = "titles:episode_detail"
+                items = [
+                    {
+                        "url": reverse(url_name, args=[item.id]),
+                        "episode_title": item.episode_title,
+                        "episode_number": item.episode_number,
+                        "air_date": item.air_date,
+                        "title": item.title,
+                    }
+                    for item in t["items"]
+                ]
+            else:
+                url_name = "titles:title_detail"
+                items = [
+                    {
+                        "url": reverse(url_name, args=[item.id]),
+                        "main_title": item.title,
+                        "content": item.content_without_url,
+                    }
+                    for item in t["items"]
+                ]
+
+            sections.append({
+                "id": t["name"],
+                "section_url": "#",
+                "section_name": t["name"],
+                "section_description": t["description"],
+                "items": items,
+            })
+        return render(request, "records/index.html", {"topics": topics, "sections": sections})
 
 
 class ReviewCreateView(BaseReviewCreateView):  # レビューを追加する

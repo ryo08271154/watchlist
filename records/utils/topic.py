@@ -1,7 +1,6 @@
-from ..models import WatchRecord, Title, Tag, MyList, Episode
+from ..models import WatchRecord, Title, Tag, MyList, Episode, EpisodeWatchRecord
 from django.utils import timezone
-from django.db.models import Avg, IntegerField
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Avg, IntegerField, Exists, OuterRef, Q, Max
 
 import datetime
 import random
@@ -69,14 +68,14 @@ def today_episode_topic(request):
     topic_description = "本日更新のエピソードをピックアップ"
     topic_items = Episode.objects.filter(air_date__range=[timezone.make_aware(datetime.datetime.now(
     )-datetime.timedelta(days=1)), timezone.make_aware(datetime.datetime.now())]).order_by("air_date")
-    return {"name": topic_name, "description": topic_description, "items": topic_items}
+    return {"name": topic_name, "description": topic_description, "items": topic_items, "type": "episode"}
 
 
 def recommended_topic(request):
     topic_name = "あなたへのおすすめ"
     topic_description = "あなたの最近の視聴傾向からおすすめのタイトルをピックアップ"
     watched_list = WatchRecord.objects.filter(user=request.user, status="watched").order_by(
-        "-updated_at", "-watched_date")[:10]  # 直近10件の視聴履歴を取得
+        "-updated_at", "-watched_date").select_related("title")[:10]  # 直近10件の視聴履歴を取得
     recent_watch = WatchRecord.objects.filter(
         title=OuterRef('pk'),
         user=request.user,
@@ -104,49 +103,104 @@ def recommended_topic(request):
         recently_watched=Exists(recent_watch)
     ).filter(
         recently_watched=False
-    ).distinct())
+    ).distinct().select_related("genre").prefetch_related("sub_genre", "tags", "related_titles"))
     random.shuffle(candidates)
+
+    # 候補タイトル群のIDリスト
+    candidate_ids = [t.id for t in candidates]
+
+    # タイトルごとの平均評価を一括取得
+    title_avg_qs = WatchRecord.objects.filter(
+        title__in=candidate_ids).values('title').annotate(avg=Avg('rating'))
+    title_avg_map = {item['title']: item['avg'] for item in title_avg_qs}
+
+    # ユーザーが各タイトルを最後に見た日を一括取得
+    last_watched_qs = WatchRecord.objects.filter(
+        title__in=candidate_ids, user=request.user).values('title').annotate(last=Max('watched_date'))
+    last_watched_map = {item['title']: item['last']
+                        for item in last_watched_qs}
+
+    # 候補の関連タイトルIDを収集して、ユーザーの関連タイトルに対する最終視聴日を一括取得
+    related_ids = set()
+    for t in candidates:
+        related_ids.update([rt.id for rt in t.related_titles.all()])
+    related_last_map = {}
+    if related_ids:
+        related_last_qs = WatchRecord.objects.filter(title__in=list(
+            related_ids), user=request.user, status='watched').values('title').annotate(last=Max('watched_date'))
+        related_last_map = {item['title']: item['last']
+                            for item in related_last_qs}
+
+    def to_date(d):
+        if d is None:
+            return None
+        return d.date() if isinstance(d, datetime.datetime) else d
 
     def get_score(title):
         score = 0
-        title_avg_rating = WatchRecord.objects.filter(
-            title=title).aggregate(Avg("rating"))["rating__avg"]
-        # 平均評価に近い場合は加点
+
+        # キャッシュされた平均評価を参照
+        title_avg_rating = title_avg_map.get(title.id)
         if title_avg_rating:
             if average_rating - 10 <= title_avg_rating <= average_rating + 10:
                 score += 3
-        # サブジャンル、タグの数で加点
+
+        # サブジャンル、タグの数で加点（prefetch済みなのでDB再問い合わせなし）
         for sub_genre in title.sub_genre.all():
             if sub_genre.id in unique_sub_genres:
                 score += watched_sub_genre_list.count(sub_genre.id)
         for tag in title.tags.all():
             if tag.id in unique_tags:
                 score += watched_tag_list.count(tag.id)
-        # 長期間見ていない場合は加点
-        last_watched = WatchRecord.objects.filter(
-            title=title, user=request.user).order_by("-watched_date").first()
-        if last_watched:
-            last_watched_date = last_watched.watched_date if last_watched.watched_date else datetime.date.today()
-        else:
+
+        # 長期間見ていない場合は加点（ユーザーごとの最終視聴日をマップから取得）
+        lw = last_watched_map.get(title.id)
+        last_watched_date = to_date(lw) if lw else None
+        if not last_watched_date:
             last_watched_date = datetime.date.today()
         if last_watched_date <= datetime.date.today() - datetime.timedelta(days=365):
             score += 3 * min(datetime.date.today().year -
-                             last_watched_date.year, 5)  # 5年以上は5点
+                             last_watched_date.year, 5)
         elif last_watched_date >= datetime.date.today() - datetime.timedelta(days=90):
             score -= 5
-        # 関連タイトルに最近見ている場合は減点
+
+        # 関連タイトルに最近見ている場合は減点（関連タイトルの最終視聴日マップを参照）
         for related_title in title.related_titles.all():
-            related_last_watched = WatchRecord.objects.filter(
-                user=request.user, title=related_title, status="watched").order_by("-watched_date").first()
-            if related_last_watched:
-                related_last_watched_date = related_last_watched.watched_date
-                if related_last_watched_date >= datetime.date.today() - datetime.timedelta(days=90):
-                    score -= max((datetime.date.today() -
-                                 related_last_watched_date).days, 0) // 90
-            if related_title.air_date >= datetime.date.today() - datetime.timedelta(days=365):
+            r_last = related_last_map.get(related_title.id)
+            r_last_date = to_date(r_last) if r_last else None
+            if r_last_date and r_last_date >= datetime.date.today() - datetime.timedelta(days=90):
+                score -= max((datetime.date.today() -
+                             r_last_date).days, 0) // 90
+            if related_title.air_date and related_title.air_date >= datetime.date.today() - datetime.timedelta(days=365):
                 score -= 3
         return score
+
     items = sorted(candidates, key=get_score, reverse=True)
     topic_items = []
     topic_items.extend(items[:15])
     return {"name": topic_name, "description": topic_description, "items": topic_items}
+
+
+def next_episode_topic(request):
+    topic_name = "続きを見る"
+    topic_description = "視聴中の作品の次のエピソード"
+    watching_records = WatchRecord.objects.filter(
+        user=request.user, status="watching").select_related("title")
+    next_episodes = []
+    for record in watching_records:
+        last_watched_episode = EpisodeWatchRecord.objects.filter(
+            user=request.user, episode__title=record.title, status="watched"
+        ).order_by("-episode__episode_number").select_related("episode").first()
+
+        if last_watched_episode:
+            next_episode_number = last_watched_episode.episode.episode_number + 1
+        else:
+            next_episode_number = 1
+
+        next_episode = Episode.objects.filter(
+            title=record.title, episode_number=next_episode_number, air_date__lte=timezone.now()
+        ).first()
+
+        if next_episode:
+            next_episodes.append(next_episode)
+    return {"name": topic_name, "description": topic_description, "items": next_episodes, "type": "episode"}
