@@ -23,13 +23,47 @@
             }
 
             header {
-                min-height: 150px;
+                /* ヘッダーをコンパクトにする */
+                min-height: 64px;
+                padding: 6px 0;
                 position: sticky;
                 top: 0;
                 left: 0;
                 right: 0;
                 background-color: #fafbfc;
-                opacity: 0.9;
+                opacity: 0.98;
+                z-index: 50;
+            }
+            .header-row {
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                padding: 0 12px;
+            }
+            .header-row h1 {
+                margin: 0;
+                flex: 0 0 auto;
+            }
+            .header-row .top-bar {
+                margin-left: 0.6rem;
+                flex: 1 1 auto; /* 残り幅を占める */
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+            }
+            /* 検索フォームは左寄せ、ログアウトフォームは右寄せ */
+            .header-row .top-bar form[method="get"] {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                flex: 0 1 auto;
+            }
+            .header-row .top-bar form[method="post"] {
+                margin-left: auto; /* 右端に固定 */
+            }
+            /* タイトルとトップバーを横並びにする */
+            .header-row .top-bar {
+                margin-left: 0.6rem;
             }
             .title-section h2 {
                 background-color: #e8e8e8;
@@ -182,12 +216,14 @@
             }
 
             input[type="search"] {
-                padding: 0.4em 0.8em;
+                padding: 0.28em 0.6em; /* 小さめに */
                 border: 1px solid #ccc;
                 border-radius: 8px;
-                font-size: 1em;
+                font-size: 0.95em;
                 background: #fff;
                 transition: border 0.2s;
+                height: 32px;
+                box-sizing: border-box;
             }
 
             input[type="search"]:focus {
@@ -448,8 +484,9 @@
             .top-bar {
                 display: flex;
                 align-items: center;
-                gap: 1.5em;
-                margin-bottom: 0.5em;
+                gap: 0.6em; /* 間隔を狭める */
+                margin-bottom: 0.25em;
+                padding: 4px 8px;
             }
 
             .nav-list {
@@ -560,6 +597,21 @@
                     width: 100%;
                     min-width: 0;
                 }
+                /* モバイルではタイトルとトップバーを縦並びにする */
+                .header-row {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.4rem;
+                    padding: 6px 8px;
+                }
+                .header-row .top-bar {
+                    margin-left: 0;
+                    width: 100%;
+                    padding: 0;
+                }
+            }
+            @view-transition {
+                navigation: auto;
             }
         </style>
         {% block head %}{% endblock %}
@@ -575,7 +627,29 @@
     <body>
         {% if not request.GET.topbar %}
             <header>
-                <h1><a href="{% url 'records:index' %}">視聴記録</a></h1>
+                <div class="header-row">
+                    <h1><a href="{% url 'records:index' %}">視聴記録</a></h1>
+                    <div class="top-bar">
+                        <form action="{% url 'records:search' %}" autocomplete="off" method="get">
+                            <label for="title">検索</label>
+                            <input type="search" id="title" name="q" placeholder="検索語句を入力" />
+                            <button type="submit">検索</button>
+                        </form>
+                        <nav class="nav-list">
+                            <ul>
+                                <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
+                                <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
+                                <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
+                                <li><a href="#" id="openMenu">メニュー</a></li>
+                            </ul>
+                        </nav>
+                        <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
+                            {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
+                                {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
+                            ><button type="submit" id="logout">ログアウト</button>
+                        </form>
+                    </div>
+                </div>
                 {% if messages %}
                     <ul class="messages">
                         {% for message in messages %}
@@ -583,26 +657,6 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
-                <div class="top-bar">
-                    <form action="{% url 'records:search' %}" autocomplete="off" method="get">
-                        <label for="title">検索</label>
-                        <input type="search" id="title" name="q" placeholder="検索語句を入力" />
-                        <button type="submit">検索</button>
-                    </form>
-                    <nav class="nav-list">
-                        <ul>
-                            <li><a href="{% url 'titles:title_list' %}">タイトル一覧</a></li>
-                            <li><a href="{% url 'records:tag_list' %}">タグ一覧</a></li>
-                            <li><a href="{% url 'records:mypage' %}">マイページ</a></li>
-                            <li><a href="#" id="openMenu">メニュー</a></li>
-                        </ul>
-                    </nav>
-                    <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
-                        {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
-                            {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
-                        ><button type="submit" id="logout">ログアウト</button>
-                    </form>
-                </div>
                 <dialog id="menu">
                     <ul>
                         <li><a href="{% url 'records:mylist' %}">マイリスト</a></li>
@@ -661,11 +715,15 @@
             });
         </script>
         <script>
+            // フォームの多重送信防止。ただし GET メソッド（検索など）は無効化しない
             const forms = document.querySelectorAll("form");
 
             forms.forEach(form => {
                 const submitButton = form.querySelector("button[type='submit']");
+                if (!submitButton) return;
                 form.addEventListener("submit", event => {
+                    const method = (form.method || "get").toLowerCase();
+                    if (method === "get") return; // 検索等は無効化しない
                     if (submitButton.disabled) {
                         event.preventDefault();
                         alert("送信処理が既に行われています。");
