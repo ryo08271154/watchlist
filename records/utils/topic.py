@@ -260,7 +260,7 @@ def most_watched_topic(request):
     topic_name = "視聴回数が多いタイトル"
     topic_description = "視聴回数が多いタイトルをピックアップ"
     topic_items = list(Title.objects.annotate(watch_count=Count("watchrecord", filter=Q(
-        watchrecord__user=request.user, watchrecord__status="watched"))).order_by("-watch_count")[:30])
+        watchrecord__user=request.user, watchrecord__status="watched"))).filter(watch_count__gt=0).order_by("-watch_count")[:30])
     random.shuffle(topic_items)
     return {"name": topic_name, "description": topic_description, "items": topic_items}
 
@@ -315,9 +315,12 @@ def build_sections(request):
     if not topic_list:  # 全部消えた場合
         raise Exception("セクションを生成できませんでした。条件を満たすデータが不足しています。")
     random_topic += len(topics)  # 固定の分を増やす
-    while len(topics) < random_topic:
+    attempts = 0
+    max_attempts = len(topic_list) * 3
+    while len(topics) < random_topic and attempts < max_attempts:
         choice = random.choice(topic_list)
         topic = choice(request)
+        attempts += 1
         if topic["name"] in [i["name"] for i in topics]:  # 重複をさせないようにする
             continue
         topics.append(topic)
