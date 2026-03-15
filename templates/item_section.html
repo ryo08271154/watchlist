@@ -4,20 +4,23 @@
     <div class="title-container">
         {% if items %}
             {% for item in items %}
-                <a href="{{ item.url }}" class="title-item">
+                <a
+                    href="{% if item.url %}{{ item.url }}{% elif item_type == 'title' %}{% url 'titles:title_detail' item.id %}{% elif item_type == 'episode' %}{% url 'titles:episode_detail' item.id %}{% endif %}"
+                    class="title-item"
+                >
                     {% if item.episode_title or item.episode_number %}
                         <div class="episode-item">
                             <h3>{% if item.episode_title %}{{ item.episode_title }}{% else %}エピソード{{ item.episode_number }}{% endif %}</h3>
                         </div>
                     {% endif %}
-                    {% if item.title and item.content_without_url %}
+                    {% if item_type == "title" %}
                         <h3>{{ item.title }}</h3>
                         <p>{{ item.content_without_url|safe|linebreaksbr }}</p>
                     {% else %}
                         <h3>{{ item.main_title }}</h3>
                         <p>{{ item.content|safe|linebreaksbr }}</p>
                     {% endif %}
-                    {% if item.episode_number %}
+                    {% if item_type == "episode" %}
                         <h3>エピソード{{ item.episode_number }}</h3>
                         <p>{{ item.air_date }}</p>
                         <p>{{ item.title }}</p>

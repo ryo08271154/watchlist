@@ -11,7 +11,7 @@ from titles.views import BaseExportView, add_tags
 from titles.utils.file_helpers import read_csv_file
 from django.db.models import Q, Sum, Exists, OuterRef
 from django.utils import timezone
-from .utils.topic import watched_date_month_topic, watched_date_year_topic, tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic, today_episode_topic, recommended_topic, next_episode_topic
+from .utils.topic import build_sections, menu_topic
 from .utils.extractor import TitleExtractor, EpisodeExtractor
 
 import csv
@@ -112,73 +112,12 @@ class BaseReviewDetailView(LoginRequiredMixin, DetailView):
 
 class IndexView(LoginRequiredMixin, View):
     def get(self, request):
-        topics = []
-        random_topic = 10  # ランダムに表示する数
-        # 一番上固定
-        topics.append(recommended_topic(request))
-        topics.append(next_episode_topic(request))
-        topics.append(today_episode_topic(request))
-        topics.append({"name": "視聴中", "description": "視聴中のタイトル", "items": Title.objects.filter(
-            watchrecord__user=request.user, watchrecord__status="watching")})
-        topics.append({"name": "今月視聴", "description": "今月視聴したタイトル", "items": Title.objects.filter(watchrecord__user=request.user, watchrecord__status="watched",
-                      watchrecord__watched_date__year=datetime.date.today().year, watchrecord__watched_date__month=datetime.date.today().month)})
-        # ランダムで表示
-        topic_list = [watched_date_month_topic, watched_date_year_topic,
-                      tag_topic, air_date_month_topic, air_date_year_topic, my_list_topic]
-        if WatchRecord.objects.filter(user=request.user).count() <= random_topic:
-            topic_list.remove(watched_date_month_topic)
-            topic_list.remove(watched_date_year_topic)
-        if Tag.objects.count() <= random_topic:
-            topic_list.remove(tag_topic)
-        if Title.objects.count() <= random_topic:
-            topic_list.remove(air_date_month_topic)
-            topic_list.remove(air_date_year_topic)
-        if MyList.objects.exclude(is_public=False).count() <= random_topic:
-            topic_list.remove(my_list_topic)
-        if not topic_list:  # 全部消えた場合
-            return render(request, "records/index.html", {"topics": topics})
-        random_topic += len(topics)  # 固定の分を増やす
-        while len(topics) < random_topic:
-            choice = random.choice(topic_list)
-            topic = choice(request)
-            if topic["name"] in [i["name"] for i in topics]:  # 重複をさせないようにする
-                continue
-            topics.append(topic)
-        sections = []
-        for t in topics:
-            is_episode = t.get("type") == "episode"
-
-            if is_episode:
-                url_name = "titles:episode_detail"
-                items = [
-                    {
-                        "url": reverse(url_name, args=[item.id]),
-                        "episode_title": item.episode_title,
-                        "episode_number": item.episode_number,
-                        "air_date": item.air_date,
-                        "title": item.title,
-                    }
-                    for item in t["items"]
-                ]
-            else:
-                url_name = "titles:title_detail"
-                items = [
-                    {
-                        "url": reverse(url_name, args=[item.id]),
-                        "main_title": item.title,
-                        "content": item.content_without_url,
-                    }
-                    for item in t["items"]
-                ]
-
-            sections.append({
-                "id": t["name"],
-                "section_url": "#",
-                "section_name": t["name"],
-                "section_description": t["description"],
-                "items": items,
-            })
-        return render(request, "records/index.html", {"topics": topics, "sections": sections})
+        try:
+            sections = build_sections(self.request)
+        except Exception as e:
+            messages.error(self.request, f"トップページの読み込みに失敗しました：{e}")
+            sections = [menu_topic(self.request)]
+        return render(request, "records/index.html", {"sections": sections})
 
 
 class ReviewCreateView(BaseReviewCreateView):  # レビューを追加する

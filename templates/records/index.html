@@ -15,6 +15,6 @@
 {% endblock %}
 {% block content %}
     {% for section in sections %}
-        {% include 'item_section.html' with id=section.id section_name=section.section_name section_description=section.section_description section_url=section.section_url empty_message=section.empty_message air_date=section.air_date episode_number=section.episode_number title=section.title episode_title=section.episode_title items=section.items %}
+        {% include 'item_section.html' with id=section.id section_name=section.section_name section_description=section.section_description section_url=section.section_url empty_message=section.empty_message item_type=section.item_type items=section.items %}
     {% endfor %}
 {% endblock %}
