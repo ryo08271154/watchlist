@@ -18,16 +18,15 @@
     </ul>
     <h1>{{ title.title }}</h1>
     <h2>
-        <a href="{% url 'records:search' %}?q={{ title.air_date|date:'Y-m-' }}">{{ title.air_date|date:"Y年m月" }}</a>｜シーズン{{ title.season }}
+        <a href="{% url 'records:search' %}?q={{ title.air_date|date:'Y-m-' }}">{{ title.air_date|date:"Y年m月" }}</a> | シーズン{{ title.season }}
     </h2>
     <p>{{ title.content_without_url|safe|linebreaksbr }}</p>
     {% if title.source_website %}
-        <p>データ取得元：{{ title.source_website }}</p>
+        <p>ソース：<a href="{{ title.source_website }}" target="_blank" rel="noopener noreferrer">{{ title.source_website_name }}</a></p>
     {% endif %}
     <ul>
-        <li>
-            <a href="{% url 'records:add_mylist' title.id %}">マイリストに追加</a>
-        </li>
+        <li><a href="{% url 'records:add_mylist' title.id %}">マイリストに追加</a></li>
+        <li><a href="{% url 'records:watch_method' title.id %}">視聴する</a></li>
         <li><a href="{% url 'records:title_review_list' title.id %}">レビュー</a></li>
     </ul>
 

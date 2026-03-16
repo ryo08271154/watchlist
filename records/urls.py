@@ -9,6 +9,8 @@ urlpatterns = [
          name="title_review_list"),
     path("title/<uuid:pk>/review/new",
          views.ReviewCreateView.as_view(), name="title_review_create"),
+    path("title/<uuid:pk>/watch_method",
+         views.WatchMethodListView.as_view(), name="watch_method"),
     path("review/<uuid:pk>/edit", views.ReviewEditView.as_view(), name="review_edit"),
     path("episode/<uuid:pk>/review",
          views.EpisodeReviewListView.as_view(), name="episode_review_list"),
@@ -40,5 +42,8 @@ urlpatterns = [
     path("export/reviews", views.ReviewExportView.as_view(), name="review_export"),
     path("export/episode_reviews", views.EpisodeReviewExportView.as_view(),
          name="episode_review_export"),
-    path("export/mylists", views.MyListExportView.as_view(), name="mylist_export")
+    path("export/mylists", views.MyListExportView.as_view(), name="mylist_export"),
+
+
+    path("share", views.AddFromShareView.as_view(), name="add_from_share"),
 ]
