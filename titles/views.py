@@ -467,4 +467,7 @@ class ExtensionInfoView(LoginRequiredMixin, TemplateView):
         elif "firefox" in user_agent:
             context["download_url"] = get_extension_assets(
                 "xpi").get("browser_download_url")
+
+        if "android" in user_agent:
+            context["app_download_url"] = "https://github.com/ryo08271154/watchlist-app#%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89"
         return context
