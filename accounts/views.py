@@ -12,7 +12,7 @@ from accounts.forms import SignUpForm, UserForm
 from accounts.models import User
 
 
-class ProfileView(TemplateView):
+class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = "registration/profile.html"
 
 
