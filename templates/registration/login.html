@@ -85,6 +85,11 @@
                 {{ form.as_p }}
                 <button type="submit">{% if mode == "signup" %}新規登録{% else %}ログイン{% endif %}</button>
             </form>
+            {% if mode == "signup" %}
+                <a href="{% url 'accounts:login' %}">ログイン</a>
+            {% else %}
+                <a href="{% url 'accounts:signup' %}">新規登録</a>
+            {% endif %}
         {% endif %}
     </body>
 </html>
