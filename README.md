@@ -16,55 +16,56 @@
 
 1. リポジトリをクローンします:
 
-   ```bash
-   git clone https://github.com/ryo08271154/watchlist.git
-   cd watchlist
-   ```
+    ```bash
+    git clone https://github.com/ryo08271154/watchlist.git
+    cd watchlist
+    ```
 
 2. 仮想環境を作成して有効化します:
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   ```
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
 
 3. 依存関係をインストールします:
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 4. `.env` ファイルを作成します。
    プロジェクトのルートディレクトリに `.env` ファイルを作成し、以下の内容を追加します。
 
-   ```
-   SECRET_KEY='your_secret_key_here'
-   DEBUG=False
-   ALLOWED_HOSTS='*'
-   DATABASE_URL=sqlite:///db.sqlite3
-   ```
+    ```
+    SECRET_KEY='your_secret_key_here'
+    DEBUG=False
+    ALLOWED_HOSTS='*'
+    DATABASE_URL=sqlite:///db.sqlite3
+    ALLOW_SIGNUP=True
+    ```
 
-   `your_secret_key_here` は、Django の秘密鍵として使用するランダムな文字列に置き換えてください。
+    `your_secret_key_here` は、Django の秘密鍵として使用するランダムな文字列に置き換えてください。
 
 5. データベースのマイグレーションを実行します:
 
-   ```bash
-   python manage.py migrate
-   ```
+    ```bash
+    python manage.py migrate
+    ```
 
 6. スーパーユーザーを作成します:
    管理画面にアクセスするためにスーパーユーザーを作成します。
 
-   ```bash
-   python manage.py createsuperuser
-   ```
+    ```bash
+    python manage.py createsuperuser
+    ```
 
-   プロンプトに従って、ユーザー名とパスワードを入力してください。
+    プロンプトに従って、ユーザー名とパスワードを入力してください。
 
 7. 開発サーバーを起動します:
 
-   ```bash
-   python manage.py runserver
-   ```
+    ```bash
+    python manage.py runserver
+    ```
 
 8. ブラウザで `http://127.0.0.1:8000/` にアクセスして動作を確認してください。

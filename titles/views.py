@@ -148,7 +148,7 @@ class TitleDetailView(LoginRequiredMixin, DetailView):  # タイトル詳細表�
 class TitleCreateView(LoginRequiredMixin, CreateView):  # タイトル追加
     model = Title
     form_class = TitleForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         title = form.save()
@@ -163,7 +163,7 @@ class TitleCreateView(LoginRequiredMixin, CreateView):  # タイトル追加
 class TitleEditView(LoginRequiredMixin, UpdateView):  # タイトル編集
     model = Title
     form_class = TitleForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         title = form.save()
@@ -177,7 +177,7 @@ class TitleEditView(LoginRequiredMixin, UpdateView):  # タイトル編集
 
 class TitleImportView(LoginRequiredMixin, FormView):  # タイトルをファイルからインポート
     form_class = TitleFileImportForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
     success_url = reverse_lazy("titles:title_list")
 
     def form_valid(self, form):
@@ -255,7 +255,7 @@ class EpisodeDetailView(LoginRequiredMixin, DetailView):  # エピソード詳�
 class TitleEpisodeCreateView(LoginRequiredMixin, CreateView):  # エピソード追加
     model = Episode
     form_class = EpisodeForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         episode = form.save(commit=False)
@@ -277,7 +277,7 @@ class EpisodeEditView(LoginRequiredMixin, UpdateView):  # エピソード編集
     model = Episode
     form_class = EpisodeForm
     context_object_name = "episode"
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         episode = form.save()
@@ -290,7 +290,7 @@ class EpisodeEditView(LoginRequiredMixin, UpdateView):  # エピソード編集
 
 class EpisodeImportView(LoginRequiredMixin, FormView):  # エピソードをファイルからインポート
     form_class = EpisodeFileImportForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         title = Title.objects.get(id=self.kwargs["pk"])

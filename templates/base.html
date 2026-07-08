@@ -641,7 +641,7 @@
                             </ul>
                         </nav>
                         <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
-                            {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
+                            {% csrf_token %}<a href="{% url 'accounts:profile' %}" class="logout">
                                 {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
                             ><button type="submit" id="logout">ログアウト</button>
                         </form>
