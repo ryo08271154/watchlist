@@ -26,7 +26,7 @@ environ.Env.read_env(".env")
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG',default=False)
+DEBUG = env('DEBUG', default=False)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
@@ -127,3 +127,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 AUTH_USER_MODEL = 'accounts.User'
+
+ALLOW_SIGNUP = env.bool("ALLOW_SIGNUP", default=True)
