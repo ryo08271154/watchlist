@@ -644,12 +644,21 @@ class MyReviewListView(LoginRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
+        filters = {
+            "user": self.request.user,
+        }
+
+        if self.request.GET.get("status"):
+            filters["status"] = self.request.GET.get("status")
+
         if self.request.GET.get("year"):
-            return super().get_queryset().filter(user=self.request.user, watched_date__year=self.request.GET.get("year")).order_by("-updated_at")
+            filters["watched_date__year"] = self.request.GET.get("year")
         else:
             now_year = datetime.date.today()
-            last_year = now_year-relativedelta.relativedelta(years=1)
-            return super().get_queryset().filter(user=self.request.user, watched_date__range=[last_year, now_year])
+            last_year = now_year - relativedelta.relativedelta(years=1)
+            filters["watched_date__range"] = [last_year, now_year]
+
+        return super().get_queryset().filter(**filters).order_by("-updated_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

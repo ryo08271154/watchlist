@@ -32,6 +32,14 @@
                 name="year"
                 placeholder="年で検索"
             />
+            <label for="status">視聴状況:</label>
+            <select name="status" id="status">
+                <option value="">すべて</option>
+                <option value="watching" {% if request.GET.status == "watching" %}selected{% endif %}>視聴中</option>
+                <option value="watched" {% if request.GET.status == "watched" %}selected{% endif %}>視聴済み</option>
+                <option value="not_watched" {% if request.GET.status == "not_watched" %}selected{% endif %}>未視聴</option>
+                <option value="dropped" {% if request.GET.status == "dropped" %}selected{% endif %}>視聴中断</option>
+            </select>
             <button type="submit">検索</button>
         </form>
     </div>
