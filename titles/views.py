@@ -440,8 +440,26 @@ class MyWatchScheduleView(LoginRequiredMixin, View):
                                                 microsecond=0)+datetime.timedelta(days=day)
             end_time = start_time + \
                 datetime.timedelta(hours=23, minutes=59, seconds=59)
-            queryset.append(Episode.objects.filter(air_date__range=[timezone.make_aware(
-                start_time), timezone.make_aware(end_time)]).order_by("air_date"))
+
+            filters = {
+                "air_date__range": [
+                    timezone.make_aware(start_time),
+                    timezone.make_aware(end_time)
+                ],
+            }
+
+            if request.GET.get("status"):
+                filters["title__watchrecord__status"] = request.GET.get(
+                    "status")
+                filters["title__watchrecord__user"] = request.user
+
+            queryset.append(
+                Episode.objects.filter(
+                    **filters
+                )
+                .distinct()
+                .order_by("air_date")
+            )
             days.append(start_time)
         data = zip(queryset, days)
         today_date = datetime.date.today()
