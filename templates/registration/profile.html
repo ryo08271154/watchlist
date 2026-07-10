@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>アカウント</h1>
+    <ul>
+        <li><a href="{% url 'accounts:profile_edit' %}">プロフィール変更</a></li>
+        <li>
+            <a href="{% url 'accounts:password_change' %}">パスワード変更</a>
+        </li>
+        <li><a href="{% url 'accounts:login' %}">アカウント切り替え</a></li>
+    </ul>
+    <form id="logout-form" action="{% url 'accounts:logout' %}" method="post" style="display:none;">{% csrf_token %}</form>
+
+    <button onclick="document.getElementById('logout-form').submit();">ログアウト</button>
+{% endblock %}

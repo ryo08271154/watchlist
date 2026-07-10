@@ -148,7 +148,7 @@ class TitleDetailView(LoginRequiredMixin, DetailView):  # タイトル詳細表�
 class TitleCreateView(LoginRequiredMixin, CreateView):  # タイトル追加
     model = Title
     form_class = TitleForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         title = form.save()
@@ -163,7 +163,7 @@ class TitleCreateView(LoginRequiredMixin, CreateView):  # タイトル追加
 class TitleEditView(LoginRequiredMixin, UpdateView):  # タイトル編集
     model = Title
     form_class = TitleForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         title = form.save()
@@ -177,7 +177,7 @@ class TitleEditView(LoginRequiredMixin, UpdateView):  # タイトル編集
 
 class TitleImportView(LoginRequiredMixin, FormView):  # タイトルをファイルからインポート
     form_class = TitleFileImportForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
     success_url = reverse_lazy("titles:title_list")
 
     def form_valid(self, form):
@@ -255,7 +255,7 @@ class EpisodeDetailView(LoginRequiredMixin, DetailView):  # エピソード詳�
 class TitleEpisodeCreateView(LoginRequiredMixin, CreateView):  # エピソード追加
     model = Episode
     form_class = EpisodeForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         episode = form.save(commit=False)
@@ -277,7 +277,7 @@ class EpisodeEditView(LoginRequiredMixin, UpdateView):  # エピソード編集
     model = Episode
     form_class = EpisodeForm
     context_object_name = "episode"
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         episode = form.save()
@@ -290,7 +290,7 @@ class EpisodeEditView(LoginRequiredMixin, UpdateView):  # エピソード編集
 
 class EpisodeImportView(LoginRequiredMixin, FormView):  # エピソードをファイルからインポート
     form_class = EpisodeFileImportForm
-    template_name = "titles/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         title = Title.objects.get(id=self.kwargs["pk"])
@@ -440,8 +440,26 @@ class MyWatchScheduleView(LoginRequiredMixin, View):
                                                 microsecond=0)+datetime.timedelta(days=day)
             end_time = start_time + \
                 datetime.timedelta(hours=23, minutes=59, seconds=59)
-            queryset.append(Episode.objects.filter(air_date__range=[timezone.make_aware(
-                start_time), timezone.make_aware(end_time)]).order_by("air_date"))
+
+            filters = {
+                "air_date__range": [
+                    timezone.make_aware(start_time),
+                    timezone.make_aware(end_time)
+                ],
+            }
+
+            if request.GET.get("status"):
+                filters["title__watchrecord__status"] = request.GET.get(
+                    "status")
+                filters["title__watchrecord__user"] = request.user
+
+            queryset.append(
+                Episode.objects.filter(
+                    **filters
+                )
+                .distinct()
+                .order_by("air_date")
+            )
             days.append(start_time)
         data = zip(queryset, days)
         today_date = datetime.date.today()
@@ -467,4 +485,7 @@ class ExtensionInfoView(LoginRequiredMixin, TemplateView):
         elif "firefox" in user_agent:
             context["download_url"] = get_extension_assets(
                 "xpi").get("browser_download_url")
+
+        if "android" in user_agent:
+            context["app_download_url"] = "https://github.com/ryo08271154/watchlist-app#%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89"
         return context

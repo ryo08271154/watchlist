@@ -33,6 +33,14 @@
             <button type="button" id="prev-week-btn" onclick="addWeek(-1)">前の週</button>
             <button type="button" id="next-week-btn" onclick="addWeek(1)">次の週</button>
         </div>
+        <label for="status">視聴状況:</label>
+        <select name="status" id="status" onchange="this.form.submit()">
+            <option value="">すべて</option>
+            <option value="watching" {% if request.GET.status == "watching" %}selected{% endif %}>視聴中</option>
+            <option value="watched" {% if request.GET.status == "watched" %}selected{% endif %}>視聴済み</option>
+            <option value="not_watched" {% if request.GET.status == "not_watched" %}selected{% endif %}>未視聴</option>
+            <option value="dropped" {% if request.GET.status == "dropped" %}selected{% endif %}>視聴中断</option>
+        </select>
     </form>
     {% for day_episodes , day in data %}
         <div class="title-section">

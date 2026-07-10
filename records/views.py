@@ -49,7 +49,7 @@ def create_graph(x=[], y=[], x_label="", y_label="", title="", figsize=(8, 6), l
 
 
 class BaseReviewCreateView(LoginRequiredMixin, CreateView):
-    template_name = "records/form.html"
+    template_name = "form.html"
     object_model = None
     field_name = None
     success_url_name = None
@@ -74,7 +74,7 @@ class BaseReviewCreateView(LoginRequiredMixin, CreateView):
 
 
 class BaseReviewEditView(LoginRequiredMixin, UpdateView):
-    template_name = "records/form.html"
+    template_name = "form.html"
     success_url_name = None
 
     def get_queryset(self):
@@ -136,7 +136,7 @@ class ReviewEditView(BaseReviewEditView):  # レビューを編集する
 
 class ReviewImportView(LoginRequiredMixin, FormView):  # レビューをファイルからインポート
     form_class = ReviewFileImportForm
-    template_name = "records/form.html"
+    template_name = "form.html"
     success_url = reverse_lazy("titles:title_list")
 
     def form_valid(self, form):
@@ -261,7 +261,7 @@ class MyListDetailView(LoginRequiredMixin, DetailView):  # マイリストの詳
 class MyListCreateView(LoginRequiredMixin, CreateView):  # マイリストを作成
     model = MyList
     form_class = MyListForm
-    template_name = "records/form.html"
+    template_name = "form.html"
 
     def form_valid(self, form):
         mylist = form.save(commit=False)
@@ -277,7 +277,7 @@ class MyListCreateView(LoginRequiredMixin, CreateView):  # マイリストを作
 class MyListEditView(LoginRequiredMixin, UpdateView):  # マイリストを編集
     model = MyList
     form_class = MyListForm
-    template_name = "records/form.html"
+    template_name = "form.html"
 
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
@@ -293,7 +293,7 @@ class MyListEditView(LoginRequiredMixin, UpdateView):  # マイリストを編�
 
 class MyListAddTitleView(LoginRequiredMixin, FormView):  # マイリストにタイトルを追加
     form_class = MyListAddTitleForm
-    template_name = "records/form.html"
+    template_name = "form.html"
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -644,12 +644,21 @@ class MyReviewListView(LoginRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
+        filters = {
+            "user": self.request.user,
+        }
+
+        if self.request.GET.get("status"):
+            filters["status"] = self.request.GET.get("status")
+
         if self.request.GET.get("year"):
-            return super().get_queryset().filter(user=self.request.user, watched_date__year=self.request.GET.get("year")).order_by("-updated_at")
+            filters["watched_date__year"] = self.request.GET.get("year")
         else:
             now_year = datetime.date.today()
-            last_year = now_year-relativedelta.relativedelta(years=1)
-            return super().get_queryset().filter(user=self.request.user, watched_date__range=[last_year, now_year])
+            last_year = now_year - relativedelta.relativedelta(years=1)
+            filters["watched_date__range"] = [last_year, now_year]
+
+        return super().get_queryset().filter(**filters).order_by("-updated_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

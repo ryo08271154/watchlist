@@ -610,9 +610,6 @@
                     padding: 0;
                 }
             }
-            @view-transition {
-                navigation: auto;
-            }
         </style>
         {% block head %}{% endblock %}
         <meta charset="UTF-8" />
@@ -644,7 +641,7 @@
                             </ul>
                         </nav>
                         <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0 0 0 auto">
-                            {% csrf_token %}<a href="{% url 'accounts:login' %}" class="logout">
+                            {% csrf_token %}<a href="{% url 'accounts:profile' %}" class="logout">
                                 {% if user.nickname %}{{ user.nickname }}{% else %}ユーザー{% endif %}</a
                             ><button type="submit" id="logout">ログアウト</button>
                         </form>
@@ -666,7 +663,7 @@
                         <li>
                             <a href="https://github.com/ryo08271154/watchlist" target="_blank">ソースコード</a>
                         </li>
-                        <li><a href="{% url 'titles:extension' %}">拡張機能</a></li>
+                        <li><a href="{% url 'titles:extension' %}">拡張機能・アプリ</a></li>
                     </ul>
                     <button id="closeMenu">閉じる</button>
                 </dialog>
