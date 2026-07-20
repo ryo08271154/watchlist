@@ -619,6 +619,17 @@
         <link rel="icon" href="{% static 'favicon.ico' %}" />
         <link rel="manifest" href="{% static 'manifest.json' %}" />
         <title>視聴記録 {% block title %}{% endblock %}</title>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBBXF84G2Z"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+
+            gtag("config", "G-GBBXF84G2Z");
+        </script>
     </head>
 
     <body>

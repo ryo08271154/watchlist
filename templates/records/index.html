@@ -14,7 +14,69 @@
     </style>
 {% endblock %}
 {% block content %}
-    {% for section in sections %}
-        {% include 'item_section.html' with id=section.id section_name=section.section_name section_description=section.section_description section_url=section.section_url empty_message=section.empty_message item_type=section.item_type items=section.items %}
-    {% endfor %}
+    {% if user.is_authenticated %}
+        {% for section in sections %}
+            {% include 'item_section.html' with id=section.id section_name=section.section_name section_description=section.section_description section_url=section.section_url empty_message=section.empty_message item_type=section.item_type items=section.items %}
+        {% endfor %}
+    {% endif %}
+
+    {% if not user.is_authenticated %}
+        <div style="margin-top: 40px; padding: 30px; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #ddd; line-height: 1.8;">
+            <h1 style="margin-bottom: 20px; color: #333;">視聴記録</h1>
+            <p style="font-size: 1.1em; margin-bottom: 30px;">
+                映画やドラマ、アニメなど、観たい作品が多すぎて「あれ、次何観るんだっけ？」「シーズン2の何話まで観たっけ？」と迷った経験はありませんか？<br />
+                そんなお悩みを解決し、あなたの映像エンタメライフをもっと便利で豊かにするための<strong>「自分専用の視聴管理データベース」</strong>です。
+            </p>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="location.href='{% url 'accounts:login' %}'">ログイン</button>
+                <button onclick="location.href='{% url 'accounts:signup' %}'">新規登録</button>
+            </div>
+
+            <h3 style="margin-bottom: 15px; border-bottom: 2px solid #ccc; padding-bottom: 5px;">できること</h3>
+
+            <div style="margin-bottom: 25px;">
+                <h4 style="margin-bottom: 10px; color: #0056b3;">1. 観たい作品を逃さない「作品ストック」</h4>
+                <p>
+                    SNSや友人からのおすすめで気になる作品を見つけたら、まずは登録しておきましょう。ジャンルや放送日などの情報と一緒にまとめておけるので、週末や休みの日に「さて、何を観ようかな」と思った時、迷わず最高の作品を選べます。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <h4 style="margin-bottom: 10px; color: #0056b3;">2. どこまで観たか一目でわかる「進捗管理」</h4>
+                <p>
+                    作品ごとに「未視聴」「視聴中」「視聴済み」「視聴中断」といったステータスを設定できます。さらに、長編ドラマやアニメの場合は<strong>「第何話まで観たか」というエピソードごとの記録</strong>も細かく残せるため、数ヶ月ぶりに続きを観る時でも「どこからだっけ？」と探す手間が省けます。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <h4 style="margin-bottom: 10px; color: #0056b3;">3. 迷子を防ぐ「視聴方法のメモ」</h4>
+                <p>
+                    「この映画はNetflix」「このアニメはAmazon
+                    Prime」など、現代は視聴サービスがバラバラになりがちです。利用している配信サービスや放送局をメモしておくことで、観たい時にすぐそのサービスを開くことができます。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <h4 style="margin-bottom: 10px; color: #0056b3;">4. あなたの感情を保存する「レビュー＆評価」</h4>
+                <p>
+                    見終わった後の感動や感想を、100点満点のスコアとコメントで記録できます。<strong>ネタバレ防止機能</strong>もついているため、物語の核心に触れる感想も気にせず書き残せます。数年後に見返したとき、当時の自分の気持ちを鮮明に思い出せる大切な記録になります。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <h4 style="margin-bottom: 10px; color: #0056b3;">5. テーマで作る自分だけの「マイリスト」</h4>
+                <p>
+                    「絶対に泣ける映画まとめ」「週末一気見用ドラマ」など、自由なテーマでリストを作ることができます。このリストは自分だけで楽しむ（非公開）ことも、他の人にシェア（公開）することも可能です。
+                </p>
+            </div>
+
+            <div style="margin-top: 30px; padding: 15px; background-color: #e9f5ff; border-radius: 8px;">
+                <p style="margin: 0; font-weight: bold; text-align: center;">
+                    💡 まずは、最近観た作品やこれから観たい作品を1つ登録してみませんか？<br />
+                    あなたのエンタメ記録の第一歩が、ここから始まります！
+                </p>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

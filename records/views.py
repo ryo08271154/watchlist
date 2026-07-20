@@ -110,10 +110,13 @@ class BaseReviewDetailView(LoginRequiredMixin, DetailView):
         return super().get_queryset().filter(Q(user=self.request.user) | Q(user__is_public=True))
 
 
-class IndexView(LoginRequiredMixin, View):
+class IndexView(View):
     def get(self, request):
         try:
-            sections = build_sections(self.request)
+            if request.user.is_authenticated:
+                sections = build_sections(self.request)
+            else:
+                sections = []
         except Exception as e:
             messages.error(self.request, f"トップページの読み込みに失敗しました：{e}")
             sections = [menu_topic(self.request)]
