@@ -318,7 +318,7 @@ class MyListAddTitleView(LoginRequiredMixin, FormView):  # マイリストにタ
         return super().form_valid(form)
 
 
-class TagView(LoginRequiredMixin, ListView):  # タグ一覧表示
+class TagView(ListView):  # タグ一覧表示
     model = Tag
     context_object_name = "tags"
     template_name = "records/tag_list.html"

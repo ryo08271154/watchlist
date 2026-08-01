@@ -108,7 +108,7 @@ def add_seasonal_tags_to_title(title):
     return tags
 
 
-class TitleListView(LoginRequiredMixin, ListView):  # 全タイトル表示
+class TitleListView(ListView):  # 全タイトル表示
     model = Title
     content_object_name = "titles"
     template_name = "titles/title_list.html"
@@ -474,7 +474,7 @@ class EpisodeExportView(BaseExportView):
     model = Episode
 
 
-class ExtensionInfoView(LoginRequiredMixin, TemplateView):
+class ExtensionInfoView(TemplateView):
     template_name = "titles/extension.html"
 
     def get_context_data(self, **kwargs):
