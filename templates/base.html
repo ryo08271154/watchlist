@@ -493,6 +493,28 @@
                 margin: 0;
                 gap: 0.5em;
             }
+            .breadcrumbs {
+                padding: 0.35rem 1rem;
+                color: #666;
+                font-size: 0.9rem;
+            }
+            .breadcrumbs ol {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.35rem;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+            .breadcrumbs li + li::before {
+                content: ">";
+                color: #999;
+                margin-right: 0.35rem;
+            }
+            .breadcrumbs [aria-current="page"] {
+                color: #222;
+                font-weight: 600;
+            }
             .title-container {
                 display: flex;
                 overflow-x: auto;
@@ -669,6 +691,44 @@
                 </dialog>
             </header>
         {% endif %}
+        {% with route=request.resolver_match.url_name %}
+            {% if route == "episode_detail" or route == "review_detail" or route == "episode_review_detail" or route == "title_review_list" or route == "episode_review_list" %}
+                <nav class="breadcrumbs" aria-label="パンくずリスト">
+                    <ol>
+                        {% if route == "episode_detail" %}
+                            <li><a href="{% url 'titles:title_detail' episode.title.pk %}">{{ episode.title.title }}</a></li>
+                            <li aria-current="page">エピソード{{ episode.episode_number }}</li>
+                        {% elif route == "review_detail" %}
+                            <li><a href="{% url 'titles:title_detail' watch_record.title.pk %}">{{ watch_record.title.title }}</a></li>
+                            <li><a href="{% url 'records:title_review_list' watch_record.title.pk %}">レビュー一覧</a></li>
+                            <li aria-current="page">レビュー詳細</li>
+                        {% elif route == "episode_review_detail" %}
+                            <li>
+                                <a href="{% url 'titles:title_detail' watch_record.episode.title.pk %}">{{ watch_record.episode.title.title }}</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'titles:episode_detail' watch_record.episode.pk %}"
+                                    >エピソード {{ watch_record.episode.episode_number }}</a
+                                >
+                            </li>
+                            <li><a href="{% url 'records:episode_review_list' watch_record.episode.pk %}">レビュー一覧</a> ></li>
+                            <li aria-current="page">レビュー詳細</li>
+                        {% elif route == "title_review_list" %}
+                            <li><a href="{% url 'titles:title_detail' title.pk %}">{{ title.title }}</a></li>
+                            <li aria-current="page">レビュー一覧</li>
+                        {% elif route == "episode_review_list" %}
+                            <li>
+                                <a href="{% url 'titles:title_detail' episode.title.pk %}">{{ episode.title.title }}</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'titles:episode_detail' episode.pk %}">エピソード {{ episode.episode_number }}</a>
+                            </li>
+                            <li aria-current="page">レビュー一覧</li>
+                        {% endif %}
+                    </ol>
+                </nav>
+            {% endif %}
+        {% endwith %}
         {% block content %}
         {% endblock %}
         <script>
