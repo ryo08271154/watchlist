@@ -6,21 +6,32 @@
             <li><a href="{% url 'records:episode_review_edit' watch_record.pk %}">レビュー編集</a></li>
         </ul>
     {% endif %}
-    <h1>{{ watch_record.comment_title }}</h1>
-    <h2>
-        {{ watch_record.get_status_display }} | 視聴日:{{ watch_record.watched_date|date:"Y年m月d日" }} | 評価:{{ watch_record.rating }} |
-        視聴方法:{{ watch_record.watch_method }}
-    </h2>
-    <p>{{ watch_record.comment|safe|linebreaksbr }}</p>
-    <h3>
-        <a href="{% url 'titles:episode_detail' watch_record.episode.pk %}"
-            >{{ watch_record.episode.title }} | シーズン{{ watch_record.episode.title.season }}</a
-        >
-    </h3>
-    <h3>タグ</h3>
+    <h1>{% if watch_record.comment_title %}{{ watch_record.comment_title }}{% else %}コメントタイトル未入力{% endif %}</h1>
+    <h2>視聴情報</h2>
+    <dl>
+        <dt>視聴状況</dt>
+        <dd>{% if watch_record.get_status_display %}{{ watch_record.get_status_display }}{% else %}未設定{% endif %}</dd>
+        <dt>視聴日</dt>
+        <dd>{% if watch_record.watched_date %}{{ watch_record.watched_date|date:"Y年m月d日" }}{% else %}未記録{% endif %}</dd>
+        <dt>評価</dt>
+        <dd>{% if watch_record.rating %}{{ watch_record.rating }}{% else %}未評価{% endif %}</dd>
+        <dt>視聴方法</dt>
+        <dd>{% if watch_record.watch_method %}{{ watch_record.watch_method }}{% else %}未設定{% endif %}</dd>
+        <dt>ネタバレ</dt>
+        <dd>{% if watch_record.is_spoiler %}あり{% else %}なし{% endif %}</dd>
+    </dl>
+    <h2>コメント</h2>
+    {% if watch_record.comment %}
+        <p>{{ watch_record.comment|linebreaksbr }}</p>
+    {% else %}
+        <p>コメントはありません。</p>
+    {% endif %}
+    <h2>タグ</h2>
     <ul>
         {% for i in watch_record.tags.all %}
             <li><a href="{% url 'records:tag_detail' i.id %}">{{ i.name }}</a></li>
+            {% empty %}
+            <li>タグはありません。</li>
         {% endfor %}
     </ul>
 {% endblock %}
