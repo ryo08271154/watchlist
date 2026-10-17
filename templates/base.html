@@ -692,7 +692,7 @@
             </header>
         {% endif %}
         {% with route=request.resolver_match.url_name %}
-            {% if "detail" in route or "review" in route %}
+            {% if route == "episode_detail" or route == "review_detail" or route == "episode_review_detail" or route == "title_review_list" or route == "episode_review_list" %}
                 <nav class="breadcrumbs" aria-label="パンくずリスト">
                     <ol>
                         {% if route == "episode_detail" %}
@@ -700,7 +700,7 @@
                             <li aria-current="page">エピソード{{ episode.episode_number }}</li>
                         {% elif route == "review_detail" %}
                             <li><a href="{% url 'titles:title_detail' watch_record.title.pk %}">{{ watch_record.title.title }}</a></li>
-                            <li><a href="{% url 'records:title_review_list' watch_record.title.pk %}">レビュー一覧</a> ></li>
+                            <li><a href="{% url 'records:title_review_list' watch_record.title.pk %}">レビュー一覧</a></li>
                             <li aria-current="page">レビュー詳細</li>
                         {% elif route == "episode_review_detail" %}
                             <li>
